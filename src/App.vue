@@ -79,42 +79,18 @@ export default {
 </script>
 
 <template>
-    <!-- 
-    Tailwind sigue, en general, algunas convenciones para sus estilos.
-    - Para algunos estilos que tienen una lista posible de valores ya pre-definidos (y que no colisionan con valores de
-    otros estilos), Tailwind utiliza como nombre de la clase el valor del estilo. Por ejemplo, los display.
-        Si queremos:
-            display: flex;                  => flex
-            display: inline-block;          => inline-block
-            display: grid;                  => grid
-    - Para la mayoría de los estilos, Tailwind utiliza el formato de: estilo-valor
-    El valor puede ser una keyword, en el caso de estilos que así lo requieren (como "justify-contents"), o puede
-    ser una medida (como en "font-size"), o podrá ser algún otro tipo de valor (como para colores).
-    Por ejemplo, clases como "justify-contents", "gap", "margin", "background-color", etc.
-        Si queremos:
-            margin: 1rem;                   => m-4
-            padding-top: .5rem;             => pt-2
-            background-color: white;        => bg-white
-    Lo que pueden ir notando, es que para la mayoría de los estilos que aceptan una dimensión (número más unidad de 
-    medida), aceptan una serie de posibles valores, empezando por un número que es el múltiplo de 4 que queremos aplicar,
-    o dicho de otra forma, el múltiplo de .25rem que queremos aplicar.
-    -->
-    <div class="min-h-screen flex flex-col bg-primary-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="flex flex-col h-full bg-blue-50 dark:bg-gray-900 transition-colors duration-200">
         <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
-        <div class="flex-1 container mx-auto px-4 py-8">
-            <!-- <router-view /> -->
+        <main class="flex-grow container mx-auto">
             <RouterView />
-            <!-- <RouterView
-                @login="handleLogin"
-            /> -->
-        </div>
-        <footer class="bg-primary-600 dark:bg-gray-800 text-white py-6 shadow-inner w-full transition-colors duration-200">
+        </main>
+        <footer class="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 text-white py-6 shadow-inner w-full transition-colors duration-200">
             <div class="container mx-auto flex flex-col md:flex-row items-center justify-between px-4">
                 <p class="text-center md:text-left text-sm">Davinci &copy; 2025. Todos los derechos reservados.</p>
                 <div class="flex space-x-4 mt-2 md:mt-0">
-                    <a href="#" class="hover:text-primary-200 dark:hover:text-gray-300 transition-colors">Términos</a>
-                    <a href="#" class="hover:text-primary-200 dark:hover:text-gray-300 transition-colors">Privacidad</a>
-                    <a href="#" class="hover:text-primary-200 dark:hover:text-gray-300 transition-colors">Contacto</a>
+                    <a href="#" class="hover:text-blue-200 dark:hover:text-gray-300 transition-colors">Términos</a>
+                    <a href="#" class="hover:text-blue-200 dark:hover:text-gray-300 transition-colors">Privacidad</a>
+                    <a href="#" class="hover:text-blue-200 dark:hover:text-gray-300 transition-colors">Contacto</a>
                 </div>
             </div>
         </footer>
@@ -127,5 +103,17 @@ export default {
     transition-property: background-color, border-color, color, fill, stroke;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 </style>

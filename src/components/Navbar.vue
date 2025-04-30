@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { subscribeToUserState, logout } from '../services/auth';
 
@@ -15,12 +15,29 @@ export default {
     const route = useRoute();
     const menuOpen = ref(false);
     const profileMenuOpen = ref(false);
+    const profileMenuRef = ref(null);
     const user = ref({ id: null, email: null, username: null });
     
     // Suscribirse a los cambios en el estado del usuario
     onMounted(() => {
       subscribeToUserState(newUserState => {
         user.value = newUserState;
+      });
+
+      // Agregar event listener para cerrar el menú al hacer clic fuera
+      document.addEventListener('click', (event) => {
+        if (profileMenuRef.value && !profileMenuRef.value.contains(event.target)) {
+          profileMenuOpen.value = false;
+        }
+      });
+    });
+
+    // Limpiar event listener al desmontar el componente
+    onUnmounted(() => {
+      document.removeEventListener('click', (event) => {
+        if (profileMenuRef.value && !profileMenuRef.value.contains(event.target)) {
+          profileMenuOpen.value = false;
+        }
       });
     });
 
@@ -51,7 +68,7 @@ export default {
       try {
         await logout();
         // Redirigir al usuario a la página de inicio de sesión
-        window.location.href = '/login';
+        window.location.href = '/ingresar';
       } catch (error) {
         console.error('Error al cerrar sesión:', error);
       }
@@ -61,6 +78,7 @@ export default {
       route,
       menuOpen,
       profileMenuOpen,
+      profileMenuRef,
       user,
       filteredNavLinks,
       toggleMenu,
@@ -97,7 +115,7 @@ export default {
           </router-link>
           
           <!-- Menú de perfil -->
-          <div class="relative" v-if="user.id">
+          <div class="relative" v-if="user.id" ref="profileMenuRef">
             <button
               @click="toggleProfileMenu"
               class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"

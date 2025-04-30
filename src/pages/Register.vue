@@ -2,11 +2,13 @@
 import MainH1 from '../components/MainH1.vue';
 import { register } from '../services/auth';
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default {
     name: 'Register',
     components: { MainH1 },
     setup() {
+        const router = useRouter();
         const email = ref('');
         const password = ref('');
         const username = ref('');
@@ -36,6 +38,10 @@ export default {
                 email.value = '';
                 password.value = '';
                 username.value = '';
+                // Redirigir a la página de inicio de sesión después de 2 segundos
+                setTimeout(() => {
+                    router.push('/ingresar');
+                }, 2000);
             } catch (err) {
                 error.value = err.message || 'Error al crear la cuenta. Por favor, intenta nuevamente.';
             } finally {
@@ -58,64 +64,79 @@ export default {
 </script>
 
 <template>
-    <MainH1>Crear una nueva cuenta</MainH1>
+    <div class="w-full bg-blue-50 dark:bg-gray-900 py-8">
+        <MainH1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">Crear una nueva cuenta</MainH1>
 
-    <form 
-        action="#"
-        @submit.prevent="handleSubmit"
-        class="max-w-md mx-auto"
-    >
-        <div class="mb-4">
-            <label for="username" class="block mb-2 text-sm font-medium text-gray-700">Nombre de usuario</label>
-            <input
-                type="text"
-                id="username"
-                class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                v-model="username"
-                required
-                placeholder="Nombre de usuario"
-                :disabled="loading"
-            >
-        </div>
-        <div class="mb-4">
-            <label for="email" class="block mb-2 text-sm font-medium text-gray-700">Email</label>
-            <input
-                type="email"
-                id="email"
-                class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                v-model="email"
-                required
-                placeholder="ejemplo@correo.com"
-                :disabled="loading"
-            >
-        </div>
-        <div class="mb-4">
-            <label for="password" class="block mb-2 text-sm font-medium text-gray-700">Contraseña</label>
-            <input
-                type="password"
-                id="password"
-                class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                v-model="password"
-                required
-                minlength="6"
-                placeholder="Mínimo 6 caracteres"
-                :disabled="loading"
-            >
-        </div>
-        <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p class="text-red-600 text-sm">{{ error }}</p>
-        </div>
-        <div v-if="success" class="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-            <p class="text-green-600 text-sm">
-                ¡Cuenta creada exitosamente! Por favor, verifica tu correo electrónico para activar tu cuenta.
-            </p>
-        </div>
-        <button 
-            type="submit" 
-            class="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            :disabled="!isFormValid || loading"
+        <form 
+            action="#"
+            @submit.prevent="handleSubmit"
+            class="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-all duration-200"
         >
-            {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
-        </button>
-    </form>
+            <div class="mb-6">
+                <input
+                    type="text"
+                    id="username"
+                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                           placeholder-gray-500 dark:placeholder-gray-400
+                           transition-all duration-200"
+                    v-model="username"
+                    required
+                    placeholder="Nombre de usuario"
+                    :disabled="loading"
+                >
+            </div>
+            <div class="mb-6">
+                <input
+                    type="email"
+                    id="email"
+                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                           placeholder-gray-500 dark:placeholder-gray-400
+                           transition-all duration-200"
+                    v-model="email"
+                    required
+                    placeholder="Email"
+                    :disabled="loading"
+                >
+            </div>
+            <div class="mb-6">
+                <input
+                    type="password"
+                    id="password"
+                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
+                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                           placeholder-gray-500 dark:placeholder-gray-400
+                           transition-all duration-200"
+                    v-model="password"
+                    required
+                    minlength="6"
+                    placeholder="Contraseña"
+                    :disabled="loading"
+                >
+            </div>
+            <div v-if="error" class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+                <p class="text-red-600 dark:text-red-400 text-sm">{{ error }}</p>
+            </div>
+            <div v-if="success" class="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <p class="text-green-600 dark:text-green-400 text-sm">
+                    ¡Cuenta creada exitosamente! Por favor, verifica tu correo electrónico para activar tu cuenta.
+                </p>
+            </div>
+            <button 
+                type="submit" 
+                class="w-full p-3 rounded-lg bg-blue-600 dark:bg-blue-500 
+                       hover:bg-blue-500 dark:hover:bg-blue-400 
+                       focus:bg-blue-500 dark:focus:bg-blue-400 
+                       active:bg-blue-700 dark:active:bg-blue-600 
+                       text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="!isFormValid || loading"
+            >
+                {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
+            </button>
+        </form>
+    </div>
 </template>

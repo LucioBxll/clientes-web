@@ -27,9 +27,9 @@ export default {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full bg-blue-50 dark:bg-gray-900 py-8">
         <div class="max-w-3xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden transition-all duration-200">
                 <div class="px-4 py-5 sm:px-6">
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Mi Perfil</h2>
                 </div>

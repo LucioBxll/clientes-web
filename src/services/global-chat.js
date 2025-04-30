@@ -1,5 +1,6 @@
-import supabase from '../services/supabase';
+import supabase from './supabase';
 import { getCurrentUser } from './auth';
+import { upsertUser } from './users';
 /*
     # Broadcast vs Postgres Changes
     -------------------------------
@@ -62,10 +63,18 @@ export async function saveGlobalChatMessage(data) {
             throw new Error('Usuario no autenticado');
         }
 
+        // Asegurarnos de que el usuario existe en la tabla users
+        try {
+            await upsertUser(currentUser);
+        } catch (error) {
+            console.error('[global-chat.js saveGlobalChatMessage] Error al asegurar usuario en la base de datos:', error);
+            throw new Error('Error al verificar el usuario');
+        }
+
         const { data: savedMessage, error } = await supabase
             .from('global_chat')
             .insert({
-                email: currentUser.email, // Mantener el email por compatibilidad
+                email: currentUser.email,
                 username: currentUser.username || currentUser.email.split('@')[0],
                 body: data.body,
                 user_id: currentUser.id

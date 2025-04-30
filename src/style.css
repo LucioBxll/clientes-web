@@ -65,6 +65,11 @@ body {
   color: var(--color-text);
 }
 
+.h-full {
+  min-height: 100vh;
+  height: fit-content;
+}
+
 #app {
   min-height: 100vh;
   display: grid;
@@ -72,5 +77,12 @@ body {
 }
 
 html, body, #app {
-  height: 100%;
+  min-height: 100%;
 }
+
+.main-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+

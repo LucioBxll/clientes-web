@@ -1,4 +1,5 @@
 import supabase from "./supabase";
+import { upsertUser, updateUserStatus } from './users';
 
 /*
     Para manejar la comunicación del estado de autenticación entre todos los elementos del sistema (componentes, módulos,
@@ -37,6 +38,15 @@ export async function getCurrentUser() {
             email: currentUser.email,
             username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0],
         };
+        
+        // Actualizar o crear el usuario en la tabla users
+        try {
+            const dbUser = await upsertUser(user);
+            user = { ...user, ...dbUser };
+        } catch (error) {
+            console.error('Error al actualizar usuario en la base de datos:', error);
+        }
+        
         notifyAll();
     }
     
@@ -91,14 +101,21 @@ export async function register(email, password, username) {
             }
         }
 
-        // Guardamos los datos del usuario autenticado y notificamos a los observers del cambio
         if (data?.user) {
             user = {
-                ...user,
                 id: data.user.id,
                 email: data.user.email,
                 username: username.trim(),
             }
+            
+            // Crear el usuario en la tabla users
+            try {
+                const dbUser = await upsertUser(user);
+                user = { ...user, ...dbUser };
+            } catch (error) {
+                console.error('Error al crear usuario en la base de datos:', error);
+            }
+            
             notifyAll();
         }
         
@@ -121,23 +138,42 @@ export async function login(email, password) {
         throw error;
     }
 
-    // Guardamos los datos del usuario autenticado y notificamos a los observers del cambio.
     user = {
-        ...user,
         id: data.user.id,
         email: data.user.email,
         username: data.user.user_metadata?.username || data.user.email?.split('@')[0],
     }
+    
+    // Actualizar el usuario en la tabla users
+    try {
+        const dbUser = await upsertUser(user);
+        user = { ...user, ...dbUser };
+    } catch (error) {
+        console.error('Error al actualizar usuario en la base de datos:', error);
+    }
+    
     notifyAll();
-
-    // console.log("Usuario autenticado: ", data);
     return data.user;
 }
 
 export async function logout() {
     try {
+        // Actualizar estado a offline antes de cerrar sesión
+        if (user.id) {
+            await updateUserStatus(user.id, 'offline');
+        }
+        
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
+        
+        // Limpiar datos del usuario
+        user = {
+            id: null,
+            email: null,
+            username: null,
+        };
+        notifyAll();
+        
         return true;
     } catch (error) {
         console.error('Error al cerrar sesión:', error.message);

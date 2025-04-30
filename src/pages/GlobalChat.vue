@@ -46,11 +46,11 @@ export default {
                 const savedMessage = await saveGlobalChatMessage({
                     body: this.newMessage.body,
                 });
-                
+
                 // Agregamos el mensaje a la lista localmente
                 this.messages.push(savedMessage);
                 this.newMessage.body = "";
-                
+
                 // Esperamos al siguiente tick para asegurar que el DOM se actualice
                 await nextTick();
                 this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
@@ -72,7 +72,7 @@ export default {
         try {
             // Obtener el usuario actual
             this.currentUser = await getCurrentUser();
-            
+
             // Suscribirse a nuevos mensajes
             subscribeToGlobalChatNewMessages(this.handleNewMessage);
 
@@ -89,69 +89,52 @@ export default {
 </script>
 
 <template>
-    <MainH1>Chat global</MainH1>
-    
-    <div class="flex gap-4">
-        <section 
-            ref="chatContainer"
-            class="overflow-y-auto w-9/12 h-[600px] p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-primary-100 dark:border-gray-700"
-        >
-            <h2 class="sr-only">Lista de mensajes</h2>
+    <div class="bg-blue-50 dark:bg-gray-900 min-h-screen p-4">
+        <div class="container mx-auto">
+            <MainH1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Chat global</MainH1>
 
-            <ul class="flex flex-col gap-4">
-                <!-- El prefijo "v-" indica que es una directiva. Una directa es una funcionalidad de Vue que extiende
-                el HTML.
-                El v-for repite la estructura de HTML por cada elemento del array que le pasamos.
-                Siempre deberíamos agregar la propiedad "key" en conjunto con el v-for, asignándole un valor único de 
-                los datos que recibimos.
+            <div class="flex flex-col md:flex-row gap-4">
+                <section ref="chatContainer"
+                    class="overflow-y-auto w-full md:w-9/12 h-[400px] md:h-[600px] p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-primary-100 dark:border-gray-700">
+                    <h2 class="sr-only">Lista de mensajes</h2>
 
-                Otra directiva importante en Vue es "v-bind:" que se debe prefijar a cualquier otro atributo del elemento.
-                Es de las más comunes de tener que utilizar, y es por eso que Vue tiene la abreviatura de solo el ":" como
-                prefijo.
-                Lo que hace es permitirnos usar como valor para el atributo un valor de JS (ya sea una expresión, 
-                llamada a una función, acceso a un valor del componente, etc).
-                -->
-                <li
-                    v-for="message in messages"
-                    :key="message.id"
-                    class="flex flex-col gap-0.5 p-3 rounded-lg bg-primary-50 dark:bg-gray-700 hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors"
-                >
-                    <div class="font-semibold text-primary-700 dark:text-primary-400">{{ message.username }}</div>
-                    <div class="text-secondary-600 dark:text-gray-300">{{ message.body }}</div>
-                    <div class="text-sm text-secondary-400 dark:text-gray-500">{{ new Date(message.created_at).toLocaleString() }}</div>
-                </li>
-            </ul>
-        </section>
-        <section class="w-3/12">
-            <h2 class="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-4">Enviar un mensaje</h2>
+                    <ul class="flex flex-col gap-4">
+                        <li v-for="message in messages" :key="message.id"
+                            class="flex flex-col gap-0.5 p-3 rounded-lg bg-primary-50 dark:bg-gray-700 hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors">
+                            <div class="font-semibold text-primary-700 dark:text-primary-400">{{ message.username }}
+                            </div>
+                            <div class="text-secondary-600 dark:text-gray-300 break-words">{{ message.body }}</div>
+                            <div class="text-xs md:text-sm text-secondary-400 dark:text-gray-500">{{ new
+                                Date(message.created_at).toLocaleString() }}</div>
+                        </li>
+                    </ul>
+                </section>
+                <section class="w-full md:w-3/12">
+                    <h2 class="text-xl md:text-2xl font-bold text-primary-600 dark:text-primary-400 mb-4">Enviar un mensaje</h2>
 
-            <div v-if="error" class="mb-4 p-3 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg">
-                <p class="text-red-600 dark:text-red-400 text-sm">{{ error }}</p>
+                    <div v-if="error"
+                        class="mb-4 p-3 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p class="text-red-600 dark:text-red-400 text-sm">{{ error }}</p>
+                    </div>
+
+                    <form action="#" @submit.prevent="sendMessage"
+                        class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                        <div class="mb-4">
+                            <label for="body"
+                                class="block mb-2 text-secondary-600 dark:text-gray-300 font-medium">Mensaje</label>
+                            <textarea id="body"
+                                class="w-full p-2 rounded-lg border border-primary-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-500/20 outline-none transition-all min-h-[80px] md:min-h-[100px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                v-model="newMessage.body" :disabled="!currentUser || loading"
+                                placeholder="Escribe tu mensaje aquí..."></textarea>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-primary-600 hover:bg-primary-500 focus:bg-primary-500 active:bg-primary-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                            :disabled="!currentUser || !newMessage.body.trim() || loading">
+                            {{ loading ? 'Enviando...' : currentUser ? 'Enviar mensaje' : 'Inicia sesión para enviar mensajes' }}
+                        </button>
+                    </form>
+                </section>
             </div>
-
-            <form
-                action="#"
-                @submit.prevent="sendMessage"
-                class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md"
-            >
-                <div class="mb-4">
-                    <label for="body" class="block mb-2 text-secondary-600 dark:text-gray-300 font-medium">Mensaje</label>
-                    <textarea
-                        id="body"
-                        class="w-full p-2 rounded-lg border border-primary-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-500/20 outline-none transition-all min-h-[100px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        v-model="newMessage.body"
-                        :disabled="!currentUser || loading"
-                        placeholder="Escribe tu mensaje aquí..."
-                    ></textarea>
-                </div>
-                <button 
-                    type="submit" 
-                    class="w-full bg-primary-600 hover:bg-primary-500 focus:bg-primary-500 active:bg-primary-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="!currentUser || !newMessage.body.trim() || loading"
-                >
-                    {{ loading ? 'Enviando...' : currentUser ? 'Enviar mensaje' : 'Inicia sesión para enviar mensajes' }}
-                </button>
-            </form>
-        </section>
+        </div>
     </div>
 </template>
