@@ -2,9 +2,11 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { subscribeToUserState, logout } from '../services/auth';
+import Avatar from './Avatar.vue';
 
 export default {
   name: 'Navbar',
+  components: { Avatar },
   props: {
     isDark: {
       type: Boolean,
@@ -121,9 +123,12 @@ export default {
               class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               <span class="sr-only">Abrir menú de usuario</span>
-              <div class="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center text-white">
-                {{ user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() }}
-              </div>
+              <Avatar
+                :src="user.avatar_url"
+                :alt="'Avatar de ' + (user.username || user.email)"
+                :fallback-initial="user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || '?'"
+                img-class="h-8 w-8 rounded-full object-cover border-2 border-blue-400"
+              />
             </button>
             <!-- Menú desplegable -->
             <div
@@ -163,14 +168,6 @@ export default {
 
         <!-- Botón de menú móvil -->
         <div class="md:hidden flex items-center space-x-2">
-          <!-- Botón de tema para móvil -->
-          <button
-            @click="$emit('toggle-dark')"
-            class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200"
-          >
-            <span v-if="isDark" class="text-lg">🌞</span>
-            <span v-else class="text-lg">🌙</span>
-          </button>
 
           <button
             @click="toggleMenu"
@@ -202,41 +199,92 @@ export default {
       </div>
     </div>
 
-    <!-- Menú móvil -->
-    <div
-      v-show="menuOpen"
-      class="md:hidden bg-primary-50 dark:bg-gray-800 border-t border-primary-100 dark:border-gray-700 shadow-md transition-colors duration-200"
-    >
-      <div class="px-2 pt-2 pb-3 space-y-1">
-        <router-link 
-          v-for="(link, index) in filteredNavLinks()" 
-          :key="index"
-          :to="link.path"
-          :class="[
-            'block px-3 py-2 rounded-lg transition-all duration-200',
-            'text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700',
-            route.path === link.path ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
-          ]"
-        >
-          {{ link.name }}
-        </router-link>
-        
-        <!-- Menú de perfil móvil -->
-        <div v-if="user.id" class="px-3 py-2">
-          <router-link
-            to="/perfil"
-            class="block text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
-          >
-            Mi Perfil
-          </router-link>
-          <button
-            @click="handleLogout"
-            class="block w-full text-left text-red-600 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
-          >
-            Cerrar sesión
-          </button>
+    <!-- Offcanvas móvil -->
+    <transition name="slide-x">
+      <div v-if="menuOpen" class="fixed inset-0 z-50 flex">
+        <!-- Fondo oscuro -->
+        <div class="fixed inset-0 bg-black bg-opacity-40" @click="toggleMenu"></div>
+        <!-- Panel lateral -->
+        <div class="ml-auto w-72 max-w-full h-full bg-primary-50 dark:bg-gray-800 shadow-lg flex flex-col relative animate-slide-in-right">
+          <!-- Logo -->
+          <div class="flex items-center justify-between px-4 py-4 border-b border-primary-100 dark:border-gray-700">
+            <router-link to="/" class="text-xl font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+              DV Social
+            </router-link>
+            <button @click="toggleMenu" class="text-2xl text-secondary-600 dark:text-gray-300 focus:outline-none ml-2">&times;</button>
+          </div>
+          <!-- Foto y perfil -->
+          <div v-if="user.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-primary-100 dark:border-gray-700">
+            <Avatar
+              :src="user.avatar_url"
+              :alt="'Avatar de ' + (user.username || user.email)"
+              :fallback-initial="user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || '?'"
+              img-class="h-12 w-12 rounded-full object-cover border-2 border-blue-400"
+            />
+            <router-link
+              to="/perfil"
+              class="block text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
+              @click="toggleMenu"
+            >
+              Mi Perfil
+            </router-link>
+          </div>
+          <!-- Navegación -->
+          <div class="flex-1 overflow-y-auto px-2 pt-2 pb-3 space-y-1 flex flex-col border-b border-primary-100 dark:border-gray-700">
+            <router-link 
+              v-for="(link, index) in filteredNavLinks()" 
+              :key="index"
+              :to="link.path"
+              :class="[
+                'block px-3 py-2 rounded-lg transition-all duration-200',
+                'text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700',
+                route.path === link.path ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
+              ]"
+              @click="toggleMenu"
+            >
+              {{ link.name }}
+            </router-link>
+          </div>
+          <!-- Modo oscuro/claro -->
+          <div class="px-4 py-4 border-b border-primary-100 dark:border-gray-700 flex items-center">
+            <button
+              @click="$emit('toggle-dark')"
+              class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200 w-full text-center"
+            >
+              <span v-if="isDark">🌞 Modo claro</span>
+              <span v-else>🌙 Modo oscuro</span>
+            </button>
+          </div>
+          <!-- Cerrar sesión -->
+          <div v-if="user.id" class="px-4 py-4">
+            <button
+              @click="handleLogout"
+              class="block w-full text-left text-red-600 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </transition>
   </nav>
-</template> 
+</template>
+
+<style scoped>
+.slide-x-enter-active, .slide-x-leave-active {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide-x-enter-from, .slide-x-leave-to {
+  transform: translateX(100%);
+}
+.slide-x-enter-to, .slide-x-leave-from {
+  transform: translateX(0);
+}
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style> 

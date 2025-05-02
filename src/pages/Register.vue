@@ -12,6 +12,7 @@ export default {
         const email = ref('');
         const password = ref('');
         const username = ref('');
+        const avatarFile = ref(null);
         const error = ref('');
         const loading = ref(false);
         const success = ref(false);
@@ -23,6 +24,10 @@ export default {
                    username.value.length >= 3;
         });
 
+        const handleAvatarChange = (e) => {
+            avatarFile.value = e.target.files[0];
+        };
+
         const handleSubmit = async () => {
             if (!isFormValid.value) {
                 error.value = 'Por favor, completa todos los campos correctamente';
@@ -33,12 +38,12 @@ export default {
             loading.value = true;
 
             try {
-                await register(email.value, password.value, username.value);
+                await register(email.value, password.value, username.value, avatarFile.value);
                 success.value = true;
                 email.value = '';
                 password.value = '';
                 username.value = '';
-                // Redirigir a la página de inicio de sesión después de 2 segundos
+                avatarFile.value = null;
                 setTimeout(() => {
                     router.push('/ingresar');
                 }, 2000);
@@ -53,11 +58,13 @@ export default {
             email,
             password,
             username,
+            avatarFile,
             error,
             loading,
             success,
             isFormValid,
-            handleSubmit
+            handleSubmit,
+            handleAvatarChange
         }
     }
 }
@@ -116,6 +123,17 @@ export default {
                     minlength="6"
                     placeholder="Contraseña"
                     :disabled="loading"
+                >
+            </div>
+            <div class="mb-6">
+                <label for="avatar" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Imagen de perfil (opcional)</label>
+                <input
+                    type="file"
+                    id="avatar"
+                    accept="image/*"
+                    @change="handleAvatarChange"
+                    :disabled="loading"
+                    class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
             </div>
             <div v-if="error" class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">

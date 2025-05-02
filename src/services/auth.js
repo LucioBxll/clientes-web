@@ -53,12 +53,28 @@ export async function getCurrentUser() {
     return user;
 }
 
+// Función auxiliar para subir el avatar a Supabase Storage y obtener la URL pública
+async function uploadAvatar(file, userId) {
+    if (!file) return null;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}.${fileExt}`;
+    const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+    if (error) throw error;
+    const { data: publicUrlData } = supabase
+        .storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+    return publicUrlData.publicUrl;
+}
+
 /**
  * 
  * @param {string} email 
  * @param {string} password 
  */
-export async function register(email, password, username) {
+export async function register(email, password, username, avatarFile) {
     try {
         // Validación básica del correo electrónico
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -107,18 +123,28 @@ export async function register(email, password, username) {
                 email: data.user.email,
                 username: username.trim(),
             }
-            
-            // Crear el usuario en la tabla users
+
+            // Subir avatar si se seleccionó uno
+            let avatarUrl = null;
+            if (avatarFile) {
+                try {
+                    avatarUrl = await uploadAvatar(avatarFile, user.id);
+                } catch (err) {
+                    console.error('Error al subir el avatar:', err);
+                }
+            }
+
+            // Crear el usuario en la tabla users con avatar_url
             try {
-                const dbUser = await upsertUser(user);
+                const dbUser = await upsertUser({ ...user, avatar_url: avatarUrl });
                 user = { ...user, ...dbUser };
             } catch (error) {
                 console.error('Error al crear usuario en la base de datos:', error);
             }
-            
+
             notifyAll();
         }
-        
+
         return data?.user;
     } catch (error) {
         console.error('[auth.js register] Error: ', error);

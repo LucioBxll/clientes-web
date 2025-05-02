@@ -80,18 +80,20 @@ export default {
 
 <template>
     <div class="flex flex-col h-full bg-blue-50 dark:bg-gray-900 transition-colors duration-200">
-        <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
-        <main class="flex-grow container mx-auto">
+        <header role="banner">
+            <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
+        </header>
+        <main role="main" class="flex-grow container mx-auto">
             <RouterView />
         </main>
-        <footer class="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 text-white py-6 shadow-inner w-full transition-colors duration-200">
+        <footer role="contentinfo" class="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 text-white py-6 shadow-inner w-full transition-colors duration-200">
             <div class="container mx-auto flex flex-col md:flex-row items-center justify-between px-4">
                 <p class="text-center md:text-left text-sm">Davinci &copy; 2025. Todos los derechos reservados.</p>
-                <div class="flex space-x-4 mt-2 md:mt-0">
+                <nav aria-label="Enlaces legales" class="flex space-x-4 mt-2 md:mt-0">
                     <a href="#" class="hover:text-blue-200 dark:hover:text-gray-300 transition-colors">Términos</a>
                     <a href="#" class="hover:text-blue-200 dark:hover:text-gray-300 transition-colors">Privacidad</a>
                     <a href="#" class="hover:text-blue-200 dark:hover:text-gray-300 transition-colors">Contacto</a>
-                </div>
+                </nav>
             </div>
         </footer>
     </div>
