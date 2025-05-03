@@ -17,6 +17,10 @@ const routes = [
         component: () => import('../pages/Profile.vue'),
         meta: { requiresAuth: true }
     },
+    { path: '/terminos',        component: () => import('../pages/Terms.vue'), },
+    { path: '/privacidad',      component: () => import('../pages/Privacy.vue'), },
+    { path: '/calendario',      component: () => import('../pages/Calendar.vue'), },
+    { path: '/blog', component: () => import('../pages/Blog.vue'), },
 ];
 
 // Creamos el router con createRouter.
