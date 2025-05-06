@@ -73,7 +73,7 @@
 
 <script>
 export default {
-  name: 'Terms',
+  name: 'TerminosCondiciones',
   metaInfo: {
     title: 'Términos y Condiciones'
   }

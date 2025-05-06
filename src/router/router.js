@@ -21,6 +21,7 @@ const routes = [
     { path: '/privacidad',      component: () => import('../pages/Privacy.vue'), },
     { path: '/calendario',      component: () => import('../pages/Calendar.vue'), },
     { path: '/blog', component: () => import('../pages/Blog.vue'), },
+    { path: '/novedades', component: () => import('../pages/Novedades.vue'), },
 ];
 
 // Creamos el router con createRouter.

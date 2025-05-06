@@ -5,31 +5,31 @@ import { subscribeToUserState, logout } from '../services/auth';
 import Avatar from './Avatar.vue';
 
 export default {
-  name: 'Navbar',
+  name: 'BarraNavegacion',
   components: { Avatar },
   props: {
-    isDark: {
+    esOscuro: {
       type: Boolean,
       required: true
     }
   },
   setup() {
-    const route = useRoute();
-    const menuOpen = ref(false);
-    const profileMenuOpen = ref(false);
-    const profileMenuRef = ref(null);
-    const user = ref({ id: null, email: null, username: null });
+    const ruta = useRoute();
+    const menuAbierto = ref(false);
+    const menuPerfilAbierto = ref(false);
+    const refMenuPerfil = ref(null);
+    const usuario = ref({ id: null, email: null, username: null });
     
     // Suscribirse a los cambios en el estado del usuario
     onMounted(() => {
-      subscribeToUserState(newUserState => {
-        user.value = newUserState;
+      subscribeToUserState(nuevoEstadoUsuario => {
+        usuario.value = nuevoEstadoUsuario;
       });
 
       // Agregar event listener para cerrar el menú al hacer clic fuera
       document.addEventListener('click', (event) => {
-        if (profileMenuRef.value && !profileMenuRef.value.contains(event.target)) {
-          profileMenuOpen.value = false;
+        if (refMenuPerfil.value && !refMenuPerfil.value.contains(event.target)) {
+          menuPerfilAbierto.value = false;
         }
       });
     });
@@ -37,36 +37,37 @@ export default {
     // Limpiar event listener al desmontar el componente
     onUnmounted(() => {
       document.removeEventListener('click', (event) => {
-        if (profileMenuRef.value && !profileMenuRef.value.contains(event.target)) {
-          profileMenuOpen.value = false;
+        if (refMenuPerfil.value && !refMenuPerfil.value.contains(event.target)) {
+          menuPerfilAbierto.value = false;
         }
       });
     });
 
-    const navLinks = ref([
-      { name: 'Home', path: '/' },
-      { name: 'Chat Global', path: '/chat-global', requiresAuth: true },
-      { name: 'Iniciar Sesión', path: '/ingresar', requiresAuth: false },
-      { name: 'Registrarse', path: '/registro', requiresAuth: false }
+    const enlacesNavegacion = ref([
+      { nombre: 'Inicio', ruta: '/' },
+      { nombre: 'Novedades', ruta: '/novedades' },
+      { nombre: 'Chat Global', ruta: '/chat-global', requiereAuth: true },
+      { nombre: 'Iniciar Sesión', ruta: '/ingresar', requiereAuth: false },
+      { nombre: 'Registrarse', ruta: '/registro', requiereAuth: false }
     ]);
 
-    const toggleMenu = () => {
-      menuOpen.value = !menuOpen.value;
+    const alternarMenu = () => {
+      menuAbierto.value = !menuAbierto.value;
     };
 
-    const toggleProfileMenu = () => {
-      profileMenuOpen.value = !profileMenuOpen.value;
+    const alternarMenuPerfil = () => {
+      menuPerfilAbierto.value = !menuPerfilAbierto.value;
     };
 
     // Filtrar los enlaces basados en el estado de autenticación
-    const filteredNavLinks = () => {
-      return navLinks.value.filter(link => {
-        if (link.requiresAuth === undefined) return true;
-        return link.requiresAuth === (user.value.id !== null);
+    const enlacesFiltrados = () => {
+      return enlacesNavegacion.value.filter(enlace => {
+        if (enlace.requiereAuth === undefined) return true;
+        return enlace.requiereAuth === (usuario.value.id !== null);
       });
     };
 
-    const handleLogout = async () => {
+    const cerrarSesion = async () => {
       try {
         await logout();
         // Redirigir al usuario a la página de inicio de sesión
@@ -77,15 +78,15 @@ export default {
     };
 
     return {
-      route,
-      menuOpen,
-      profileMenuOpen,
-      profileMenuRef,
-      user,
-      filteredNavLinks,
-      toggleMenu,
-      toggleProfileMenu,
-      handleLogout
+      ruta,
+      menuAbierto,
+      menuPerfilAbierto,
+      refMenuPerfil,
+      usuario,
+      enlacesFiltrados,
+      alternarMenu,
+      alternarMenuPerfil,
+      cerrarSesion
     };
   }
 };
@@ -104,35 +105,35 @@ export default {
         <!-- Enlaces de navegación para desktop -->
         <div class="hidden md:flex items-center space-x-4">
           <router-link 
-            v-for="(link, index) in filteredNavLinks()" 
+            v-for="(enlace, index) in enlacesFiltrados()" 
             :key="index"
-            :to="link.path"
+            :to="enlace.ruta"
             :class="[
               'px-3 py-2 rounded-lg transition-all duration-200',
               'text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700',
-              route.path === link.path ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
+              ruta.path === enlace.ruta ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
             ]"
           >
-            {{ link.name }}
+            {{ enlace.nombre }}
           </router-link>
           
           <!-- Menú de perfil -->
-          <div class="relative" v-if="user.id" ref="profileMenuRef">
+          <div class="relative" v-if="usuario.id" ref="refMenuPerfil">
             <button
-              @click="toggleProfileMenu"
+              @click="alternarMenuPerfil"
               class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               <span class="sr-only">Abrir menú de usuario</span>
               <Avatar
-                :src="user.avatar_url"
-                :alt="'Avatar de ' + (user.username || user.email)"
-                :fallback-initial="user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || '?'"
+                :src="usuario.avatar_url"
+                :alt="'Avatar de ' + (usuario.username || usuario.email)"
+                :fallback-initial="usuario.username?.charAt(0)?.toUpperCase() || usuario.email?.charAt(0)?.toUpperCase() || '?'"
                 img-class="h-8 w-8 rounded-full object-cover border-2 border-blue-400"
               />
             </button>
             <!-- Menú desplegable -->
             <div
-              v-show="profileMenuOpen"
+              v-show="menuPerfilAbierto"
               class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
               role="menu"
               aria-orientation="vertical"
@@ -146,7 +147,7 @@ export default {
                 Mi Perfil
               </router-link>
               <button
-                @click="handleLogout"
+                @click="cerrarSesion"
                 class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 role="menuitem"
               >
@@ -159,9 +160,9 @@ export default {
           <button
             @click="$emit('toggle-dark')"
             class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200"
-            :title="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+            :title="esOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
           >
-            <span v-if="isDark" class="text-lg">🌞</span>
+            <span v-if="esOscuro" class="text-lg">🌞</span>
             <span v-else class="text-lg">🌙</span>
           </button>
         </div>
@@ -170,7 +171,7 @@ export default {
         <div class="md:hidden flex items-center space-x-2">
 
           <button
-            @click="toggleMenu"
+            @click="alternarMenu"
             class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200"
           >
             <svg
@@ -180,7 +181,7 @@ export default {
               stroke="currentColor"
             >
               <path
-                v-if="!menuOpen"
+                v-if="!menuAbierto"
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
@@ -201,9 +202,9 @@ export default {
 
     <!-- Offcanvas móvil -->
     <transition name="slide-x">
-      <div v-if="menuOpen" class="fixed inset-0 z-50 flex">
+      <div v-if="menuAbierto" class="fixed inset-0 z-50 flex">
         <!-- Fondo oscuro -->
-        <div class="fixed inset-0 bg-black bg-opacity-40" @click="toggleMenu"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-40" @click="alternarMenu"></div>
         <!-- Panel lateral -->
         <div class="ml-auto w-72 max-w-full h-full bg-primary-50 dark:bg-gray-800 shadow-lg flex flex-col relative animate-slide-in-right">
           <!-- Logo -->
@@ -211,20 +212,20 @@ export default {
             <router-link to="/" class="text-xl font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
               DV Social
             </router-link>
-            <button @click="toggleMenu" class="text-2xl text-secondary-600 dark:text-gray-300 focus:outline-none ml-2">&times;</button>
+            <button @click="alternarMenu" class="text-2xl text-secondary-600 dark:text-gray-300 focus:outline-none ml-2">&times;</button>
           </div>
           <!-- Foto y perfil -->
-          <div v-if="user.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-primary-100 dark:border-gray-700">
+          <div v-if="usuario.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-primary-100 dark:border-gray-700">
             <Avatar
-              :src="user.avatar_url"
-              :alt="'Avatar de ' + (user.username || user.email)"
-              :fallback-initial="user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || '?'"
+              :src="usuario.avatar_url"
+              :alt="'Avatar de ' + (usuario.username || usuario.email)"
+              :fallback-initial="usuario.username?.charAt(0)?.toUpperCase() || usuario.email?.charAt(0)?.toUpperCase() || '?'"
               img-class="h-12 w-12 rounded-full object-cover border-2 border-blue-400"
             />
             <router-link
               to="/perfil"
               class="block text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
-              @click="toggleMenu"
+              @click="alternarMenu"
             >
               Mi Perfil
             </router-link>
@@ -232,17 +233,17 @@ export default {
           <!-- Navegación -->
           <div class="flex-1 overflow-y-auto px-2 pt-2 pb-3 space-y-1 flex flex-col border-b border-primary-100 dark:border-gray-700">
             <router-link 
-              v-for="(link, index) in filteredNavLinks()" 
+              v-for="(enlace, index) in enlacesFiltrados()" 
               :key="index"
-              :to="link.path"
+              :to="enlace.ruta"
               :class="[
                 'block px-3 py-2 rounded-lg transition-all duration-200',
                 'text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700',
-                route.path === link.path ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
+                ruta.path === enlace.ruta ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
               ]"
-              @click="toggleMenu"
+              @click="alternarMenu"
             >
-              {{ link.name }}
+              {{ enlace.nombre }}
             </router-link>
           </div>
           <!-- Modo oscuro/claro -->
@@ -251,14 +252,14 @@ export default {
               @click="$emit('toggle-dark')"
               class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200 w-full text-center"
             >
-              <span v-if="isDark">🌞 Modo claro</span>
+              <span v-if="esOscuro">🌞 Modo claro</span>
               <span v-else>🌙 Modo oscuro</span>
             </button>
           </div>
           <!-- Cerrar sesión -->
-          <div v-if="user.id" class="px-4 py-4">
+          <div v-if="usuario.id" class="px-4 py-4">
             <button
-              @click="handleLogout"
+              @click="cerrarSesion"
               class="block w-full text-left text-red-600 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
             >
               Cerrar sesión

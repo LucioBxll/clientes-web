@@ -1,5 +1,5 @@
 import supabase from "./supabase";
-import { upsertUser, updateUserStatus } from './users';
+import { upsertUser, updateUserStatus, getUserById } from './users';
 
 /*
     Para manejar la comunicación del estado de autenticación entre todos los elementos del sistema (componentes, módulos,
@@ -33,24 +33,21 @@ export async function getCurrentUser() {
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     
     if (currentUser) {
-        user = {
-            id: currentUser.id,
-            email: currentUser.email,
-            username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0],
-        };
-        
-        // Actualizar o crear el usuario en la tabla users
+        // Obtener SIEMPRE los datos actualizados de la tabla users
         try {
-            const dbUser = await upsertUser(user);
-            user = { ...user, ...dbUser };
+            const dbUser = await getUserById(currentUser.id);
+            return dbUser;
         } catch (error) {
-            console.error('Error al actualizar usuario en la base de datos:', error);
+            console.error('Error al obtener usuario de la base de datos:', error);
+            // Si falla, al menos retorna los datos de sesión
+            return {
+                id: currentUser.id,
+                email: currentUser.email,
+                username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0],
+            };
         }
-        
-        notifyAll();
     }
-    
-    return user;
+    return null;
 }
 
 // Función auxiliar para subir el avatar a Supabase Storage y obtener la URL pública

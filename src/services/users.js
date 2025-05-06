@@ -21,6 +21,7 @@ export const upsertUser = async (userData) => {
             email: userData.email,
             username: userData.username,
             avatar_url: userData.avatar_url,
+            descripcion: userData.descripcion,
             last_login: new Date().toISOString(),
             status: 'online'
         })

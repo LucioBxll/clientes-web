@@ -7,7 +7,7 @@
         <!-- Controles del calendario -->
         <div class="flex items-center justify-between mb-6">
           <button 
-            @click="previousMonth" 
+            @click="mesAnterior" 
             class="p-2 rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-gray-700 transition-colors"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,10 +15,10 @@
             </svg>
           </button>
           <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300">
-            {{ currentMonthName }} {{ currentYear }}
+            {{ nombreMesActual }} {{ anioActual }}
           </h2>
           <button 
-            @click="nextMonth" 
+            @click="mesSiguiente" 
             class="p-2 rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-gray-700 transition-colors"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,43 +30,43 @@
         <!-- Días de la semana -->
         <div class="grid grid-cols-7 gap-1 mb-2">
           <div 
-            v-for="day in weekDays" 
-            :key="day" 
+            v-for="dia in diasSemana" 
+            :key="dia" 
             class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 py-2"
           >
-            {{ day }}
+            {{ dia }}
           </div>
         </div>
 
         <!-- Días del mes -->
         <div class="grid grid-cols-7 gap-1">
           <div 
-            v-for="day in calendarDays" 
-            :key="day.date"
+            v-for="dia in diasCalendario" 
+            :key="dia.fecha"
             :class="[
               'p-2 text-center rounded-lg transition-colors cursor-pointer',
-              day.isCurrentMonth 
+              dia.esMesActual 
                 ? 'text-gray-700 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700' 
                 : 'text-gray-400 dark:text-gray-500',
-              day.isToday ? 'bg-primary-100 dark:bg-gray-700 font-bold' : '',
-              day.isSelected ? 'bg-primary-200 dark:bg-gray-600' : '',
-              hasEvents(day.date) ? 'ring-2 ring-primary-500 dark:ring-primary-400' : ''
+              dia.esHoy ? 'bg-primary-100 dark:bg-gray-700 font-bold' : '',
+              dia.esSeleccionado ? 'bg-primary-200 dark:bg-gray-600' : '',
+              tieneEventos(dia.fecha) ? 'ring-2 ring-primary-500 dark:ring-primary-400' : ''
             ]"
-            @click="selectDate(day)"
+            @click="seleccionarFecha(dia)"
           >
-            {{ day.day }}
-            <div v-if="hasEvents(day.date)" class="w-1 h-1 mx-auto mt-1 rounded-full bg-primary-500 dark:bg-primary-400"></div>
+            {{ dia.dia }}
+            <div v-if="tieneEventos(dia.fecha)" class="w-1 h-1 mx-auto mt-1 rounded-full bg-primary-500 dark:bg-primary-400"></div>
           </div>
         </div>
 
         <!-- Eventos del día seleccionado -->
-        <div v-if="selectedDate" class="mt-6">
+        <div v-if="fechaSeleccionada" class="mt-6">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">
-              Eventos para {{ selectedDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
+              Eventos para {{ fechaSeleccionada.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
             </h3>
             <button 
-              @click="showEventForm = true"
+              @click="mostrarFormularioEvento = true"
               class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 transition-colors"
             >
               Agregar Evento
@@ -76,16 +76,16 @@
           <!-- Lista de eventos -->
           <div class="space-y-2">
             <div 
-              v-for="event in eventsForSelectedDate" 
-              :key="event.id"
+              v-for="evento in eventosDeFechaSeleccionada" 
+              :key="evento.id"
               class="p-3 rounded-lg bg-primary-50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600"
             >
               <div class="flex items-center justify-between">
-                <span class="font-medium text-gray-700 dark:text-gray-300">{{ event.title }}</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300">{{ evento.titulo }}</span>
                 <div class="flex items-center space-x-2">
-                  <span class="text-sm text-gray-500 dark:text-gray-400">{{ event.time }}</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">{{ evento.hora }}</span>
                   <button 
-                    @click="deleteEvent(event.id)"
+                    @click="eliminarEvento(evento.id)"
                     class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +94,7 @@
                   </button>
                 </div>
               </div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ event.description }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ evento.descripcion }}</p>
             </div>
           </div>
         </div>
@@ -102,16 +102,16 @@
     </div>
 
     <!-- Modal para agregar evento -->
-    <div v-if="showEventForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div v-if="mostrarFormularioEvento" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
         <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">Agregar Nuevo Evento</h3>
         
-        <form @submit.prevent="addEvent">
+        <form @submit.prevent="agregarEvento">
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
               <input 
-                v-model="newEvent.title"
+                v-model="nuevoEvento.titulo"
                 type="text" 
                 required
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
@@ -121,7 +121,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hora</label>
               <input 
-                v-model="newEvent.time"
+                v-model="nuevoEvento.hora"
                 type="time" 
                 required
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
@@ -131,7 +131,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
               <textarea 
-                v-model="newEvent.description"
+                v-model="nuevoEvento.descripcion"
                 rows="3"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
               ></textarea>
@@ -141,7 +141,7 @@
           <div class="mt-6 flex justify-end space-x-3">
             <button 
               type="button"
-              @click="showEventForm = false"
+              @click="mostrarFormularioEvento = false"
               class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               Cancelar
@@ -161,137 +161,137 @@
 
 <script>
 export default {
-  name: 'Calendar',
+  name: 'Calendario',
   data() {
     return {
-      currentDate: new Date(),
-      selectedDate: null,
-      showEventForm: false,
-      weekDays: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
-      newEvent: {
-        title: '',
-        time: '',
-        description: ''
+      fechaActual: new Date(),
+      fechaSeleccionada: null,
+      mostrarFormularioEvento: false,
+      diasSemana: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+      nuevoEvento: {
+        titulo: '',
+        hora: '',
+        descripcion: ''
       },
-      events: []
+      eventos: []
     }
   },
   computed: {
-    currentMonthName() {
-      return this.currentDate.toLocaleDateString('es-ES', { month: 'long' })
+    nombreMesActual() {
+      return this.fechaActual.toLocaleDateString('es-ES', { month: 'long' })
     },
-    currentYear() {
-      return this.currentDate.getFullYear()
+    anioActual() {
+      return this.fechaActual.getFullYear()
     },
-    calendarDays() {
-      const year = this.currentDate.getFullYear()
-      const month = this.currentDate.getMonth()
+    diasCalendario() {
+      const anio = this.fechaActual.getFullYear()
+      const mes = this.fechaActual.getMonth()
       
-      const firstDay = new Date(year, month, 1)
-      const lastDay = new Date(year, month + 1, 0)
+      const primerDia = new Date(anio, mes, 1)
+      const ultimoDia = new Date(anio, mes + 1, 0)
       
-      const prevMonthDays = firstDay.getDay()
-      const nextMonthDays = 6 - lastDay.getDay()
+      const diasPrevioMes = primerDia.getDay()
+      const diasSiguienteMes = 6 - ultimoDia.getDay()
       
-      const days = []
+      const dias = []
       
-      const prevMonth = new Date(year, month, 0)
-      for (let i = prevMonthDays - 1; i >= 0; i--) {
-        days.push({
-          date: new Date(year, month - 1, prevMonth.getDate() - i),
-          day: prevMonth.getDate() - i,
-          isCurrentMonth: false
+      const mesAnterior = new Date(anio, mes, 0)
+      for (let i = diasPrevioMes - 1; i >= 0; i--) {
+        dias.push({
+          fecha: new Date(anio, mes - 1, mesAnterior.getDate() - i),
+          dia: mesAnterior.getDate() - i,
+          esMesActual: false
         })
       }
       
-      for (let i = 1; i <= lastDay.getDate(); i++) {
-        const date = new Date(year, month, i)
-        days.push({
-          date,
-          day: i,
-          isCurrentMonth: true,
-          isToday: this.isToday(date),
-          isSelected: this.selectedDate && this.isSameDay(date, this.selectedDate)
+      for (let i = 1; i <= ultimoDia.getDate(); i++) {
+        const fecha = new Date(anio, mes, i)
+        dias.push({
+          fecha,
+          dia: i,
+          esMesActual: true,
+          esHoy: this.esHoy(fecha),
+          esSeleccionado: this.fechaSeleccionada && this.sonMismoDia(fecha, this.fechaSeleccionada)
         })
       }
       
-      for (let i = 1; i <= nextMonthDays; i++) {
-        days.push({
-          date: new Date(year, month + 1, i),
-          day: i,
-          isCurrentMonth: false
+      for (let i = 1; i <= diasSiguienteMes; i++) {
+        dias.push({
+          fecha: new Date(anio, mes + 1, i),
+          dia: i,
+          esMesActual: false
         })
       }
       
-      return days
+      return dias
     },
-    eventsForSelectedDate() {
-      if (!this.selectedDate) return []
-      return this.events.filter(event => this.isSameDay(event.date, this.selectedDate))
+    eventosDeFechaSeleccionada() {
+      if (!this.fechaSeleccionada) return []
+      return this.eventos.filter(evento => this.sonMismoDia(evento.fecha, this.fechaSeleccionada))
     }
   },
   methods: {
-    previousMonth() {
-      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1)
+    mesAnterior() {
+      this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() - 1, 1)
     },
-    nextMonth() {
-      this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1)
+    mesSiguiente() {
+      this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 1)
     },
-    selectDate(day) {
-      if (day.isCurrentMonth) {
-        this.selectedDate = day.date
+    seleccionarFecha(dia) {
+      if (dia.esMesActual) {
+        this.fechaSeleccionada = dia.fecha
       }
     },
-    isToday(date) {
-      const today = new Date()
-      return this.isSameDay(date, today)
+    esHoy(fecha) {
+      const hoy = new Date()
+      return this.sonMismoDia(fecha, hoy)
     },
-    isSameDay(date1, date2) {
-      return date1.getDate() === date2.getDate() &&
-             date1.getMonth() === date2.getMonth() &&
-             date1.getFullYear() === date2.getFullYear()
+    sonMismoDia(fecha1, fecha2) {
+      return fecha1.getDate() === fecha2.getDate() &&
+             fecha1.getMonth() === fecha2.getMonth() &&
+             fecha1.getFullYear() === fecha2.getFullYear()
     },
-    hasEvents(date) {
-      return this.events.some(event => this.isSameDay(event.date, date))
+    tieneEventos(fecha) {
+      return this.eventos.some(evento => this.sonMismoDia(evento.fecha, fecha))
     },
-    addEvent() {
-      const event = {
+    agregarEvento() {
+      const evento = {
         id: Date.now(),
-        date: new Date(this.selectedDate),
-        title: this.newEvent.title,
-        time: this.newEvent.time,
-        description: this.newEvent.description
+        fecha: new Date(this.fechaSeleccionada),
+        titulo: this.nuevoEvento.titulo,
+        hora: this.nuevoEvento.hora,
+        descripcion: this.nuevoEvento.descripcion
       }
       
-      this.events.push(event)
-      this.saveEvents()
+      this.eventos.push(evento)
+      this.guardarEventos()
       
-      this.newEvent = {
-        title: '',
-        time: '',
-        description: ''
+      this.nuevoEvento = {
+        titulo: '',
+        hora: '',
+        descripcion: ''
       }
-      this.showEventForm = false
+      this.mostrarFormularioEvento = false
     },
-    deleteEvent(eventId) {
-      this.events = this.events.filter(event => event.id !== eventId)
-      this.saveEvents()
+    eliminarEvento(idEvento) {
+      this.eventos = this.eventos.filter(evento => evento.id !== idEvento)
+      this.guardarEventos()
     },
-    saveEvents() {
-      localStorage.setItem('calendarEvents', JSON.stringify(this.events))
+    guardarEventos() {
+      localStorage.setItem('eventosCalendario', JSON.stringify(this.eventos))
     },
-    loadEvents() {
-      const savedEvents = localStorage.getItem('calendarEvents')
-      if (savedEvents) {
-        this.events = JSON.parse(savedEvents).map(event => ({
-          ...event,
-          date: new Date(event.date)
+    cargarEventos() {
+      const guardados = localStorage.getItem('eventosCalendario')
+      if (guardados) {
+        this.eventos = JSON.parse(guardados).map(evento => ({
+          ...evento,
+          fecha: new Date(evento.fecha)
         }))
       }
     }
   },
   mounted() {
-    this.loadEvents()
+    this.cargarEventos()
   }
 }
 </script>

@@ -14,7 +14,7 @@ import Navbar from './components/Navbar.vue';
 export default {
     // El "name" define el nombre del componente. Es opcional.
     // Se supone que sea igual que el nombre del archivo.
-    name: 'App',
+    name: 'Aplicacion',
     // "components" recibe un objeto donde define los componentes que se van a usar en el <template>.
     components: {
         Navbar
@@ -61,7 +61,6 @@ export default {
             if (savedTheme !== null) {
                 isDark.value = savedTheme === 'true';
             } else {
-                // Si no hay preferencia guardada, usar la preferencia del sistema
                 isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
             }
             updateTheme();

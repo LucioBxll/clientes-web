@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <img v-if="src" :src="src" :alt="alt" :class="imgClass" @error="onError" />
-    <div v-else :class="[imgClass, 'flex items-center justify-center bg-primary-600 text-white font-bold']">
-      <span>{{ fallbackInitial }}</span>
+  <div class="inline-block align-middle">
+    <img v-if="src" :src="src" :alt="alt" :class="claseImagen" @error="alError" />
+    <div v-else :class="[claseImagen, 'flex items-center justify-center bg-primary-600 text-white font-bold']">
+      <span>{{ inicialFallback }}</span>
     </div>
   </div>
 </template>
@@ -13,11 +13,11 @@ export default {
   props: {
     src: { type: String, default: null },
     alt: { type: String, default: 'Avatar' },
-    fallbackInitial: { type: String, default: '?' },
-    imgClass: { type: String, default: 'rounded-full w-16 h-16 object-cover' }
+    inicialFallback: { type: String, default: '?' },
+    claseImagen: { type: String, default: 'rounded-full w-10 h-10 object-cover object-center border-2 border-blue-400' }
   },
   methods: {
-    onError(e) {
+    alError(e) {
       e.target.style.display = 'none';
       // fallback a las iniciales
       this.$emit('error');

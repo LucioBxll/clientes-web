@@ -4,35 +4,34 @@ import { login } from '../services/auth';
 import { useRouter } from 'vue-router';
 
 export default {
-    name: 'Login',
+    name: 'IniciarSesion',
     components: { MainH1 },
     setup() {
-        const router = useRouter();
-        return { router };
+        const enrutador = useRouter();
+        return { enrutador };
     },
     data() {
         return {
-            user: {
-                email: '',
-                password: '',
+            credenciales: {
+                correo: '',
+                contrasena: '',
             },
-            loading: false,
-            error: null
+            cargando: false,
+            mensajeError: null
         }
     },
     methods: {
-        async handleSubmit() {
+        async enviarFormulario() {
             try {
-                this.loading = true;
-                this.error = null;
-                const user = await login(this.user.email, this.user.password);
-                this.loading = false;
-                
+                this.cargando = true;
+                this.mensajeError = null;
+                await login(this.credenciales.correo, this.credenciales.contrasena);
+                this.cargando = false;
                 // Redirigir al perfil después del login exitoso
-                this.router.push('/perfil');
+                this.enrutador.push('/perfil');
             } catch (error) {
-                this.error = error.message || 'Error al iniciar sesión';
-                this.loading = false;
+                this.mensajeError = error.message || 'Error al iniciar sesión';
+                this.cargando = false;
             }
         }
     }
@@ -45,41 +44,41 @@ export default {
 
         <form 
             action="#"
-            @submit.prevent="handleSubmit"
+            @submit.prevent="enviarFormulario"
             class="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-all duration-200"
         >
             <div class="mb-6">
                 <input
                     type="email"
-                    id="email"
+                    id="correo"
                     class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                            placeholder-gray-500 dark:placeholder-gray-400
                            transition-all duration-200"
-                    v-model="user.email"
-                    placeholder="Email"
-                    :disabled="loading"
+                    v-model="credenciales.correo"
+                    placeholder="Correo electrónico"
+                    :disabled="cargando"
                 >
             </div>
             <div class="mb-6">
                 <input
                     type="password"
-                    id="password"
+                    id="contrasena"
                     class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                            placeholder-gray-500 dark:placeholder-gray-400
                            transition-all duration-200"
-                    v-model="user.password"
+                    v-model="credenciales.contrasena"
                     placeholder="Contraseña"
-                    :disabled="loading"
+                    :disabled="cargando"
                 >
             </div>
             
             <!-- Mensaje de error -->
-            <div v-if="error" class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                <p class="text-red-600 dark:text-red-400 text-sm">{{ error }}</p>
+            <div v-if="mensajeError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+                <p class="text-red-600 dark:text-red-400 text-sm">{{ mensajeError }}</p>
             </div>
 
             <button 
@@ -90,9 +89,9 @@ export default {
                        active:bg-blue-700 dark:active:bg-blue-600 
                        text-white transition-all duration-200
                        disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="loading"
+                :disabled="cargando"
             >
-                {{ loading ? 'Iniciando sesión...' : 'Ingresar' }}
+                {{ cargando ? 'Iniciando sesión...' : 'Ingresar' }}
             </button>
         </form>
     </div>

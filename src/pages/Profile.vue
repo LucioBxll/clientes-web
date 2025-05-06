@@ -7,83 +7,130 @@ import { upsertUser } from '../services/users';
 import { loadLastGlobalChatMessages } from '../services/global-chat';
 
 export default {
-    name: 'Profile',
+    name: 'Perfil',
     components: { Avatar },
     setup() {
-        const user = ref(null);
-        const loading = ref(true);
-        const uploading = ref(false);
-        const error = ref('');
-        const newAvatarFile = ref(null);
-        const avatarInput = ref(null);
-        const hovering = ref(false);
-        const publicaciones = ref([]);
+        const usuario = ref(null);
+        const cargando = ref(true);
+        const subiendoAvatar = ref(false);
+        const mensajeError = ref('');
+        const archivoNuevoAvatar = ref(null);
+        const inputAvatar = ref(null);
+        const cursorSobreAvatar = ref(false);
+        const listaPublicaciones = ref([]);
+        const mostrarModalEdicion = ref(false);
+        const datosEdicion = ref({ nombreUsuario: '', descripcion: '' });
 
         onMounted(async () => {
             try {
-                user.value = await getCurrentUser();
+                usuario.value = await getCurrentUser();
                 // Traer mensajes del chat global de este usuario
-                const allMessages = await loadLastGlobalChatMessages();
-                publicaciones.value = allMessages.filter(msg => msg.user_id === user.value.id);
+                const todosMensajes = await loadLastGlobalChatMessages();
+                listaPublicaciones.value = todosMensajes.filter(msg => msg.user_id === usuario.value.id);
+                // Inicializar descripción si existe
+                if (usuario.value && usuario.value.descripcion) {
+                    datosEdicion.value.descripcion = usuario.value.descripcion;
+                }
             } catch (err) {
-                error.value = 'Error al cargar el perfil';
+                mensajeError.value = 'Error al cargar el perfil';
             } finally {
-                loading.value = false;
+                cargando.value = false;
             }
         });
 
-        const handleAvatarChange = (e) => {
-            newAvatarFile.value = e.target.files[0];
-            if (newAvatarFile.value) {
-                uploadNewAvatar();
+        const cambiarAvatar = (e) => {
+            archivoNuevoAvatar.value = e.target.files[0];
+            if (archivoNuevoAvatar.value) {
+                subirNuevoAvatar();
             }
         };
 
-        const triggerAvatarInput = () => {
-            if (avatarInput.value) avatarInput.value.click();
+        const abrirInputAvatar = () => {
+            if (inputAvatar.value) inputAvatar.value.click();
         };
 
-        const uploadNewAvatar = async () => {
-            if (!newAvatarFile.value || !user.value?.id) return;
-            uploading.value = true;
-            error.value = '';
+        const subirNuevoAvatar = async () => {
+            if (!archivoNuevoAvatar.value || !usuario.value?.id) return;
+            subiendoAvatar.value = true;
+            mensajeError.value = '';
             try {
                 // Subir imagen
-                const file = newAvatarFile.value;
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${user.value.id}/${Date.now()}.${fileExt}`;
-                const { error: uploadError } = await supabase.storage
+                const archivo = archivoNuevoAvatar.value;
+                const extension = archivo.name.split('.').pop();
+                const nombreArchivo = `${usuario.value.id}/${Date.now()}.${extension}`;
+                const { error: errorSubida } = await supabase.storage
                     .from('avatars')
-                    .upload(fileName, file, { upsert: true });
-                if (uploadError) throw uploadError;
-                const { data: publicUrlData } = supabase
+                    .upload(nombreArchivo, archivo, { upsert: true });
+                if (errorSubida) throw errorSubida;
+                const { data: datosUrlPublica } = supabase
                     .storage
                     .from('avatars')
-                    .getPublicUrl(fileName);
-                const avatarUrl = publicUrlData.publicUrl;
+                    .getPublicUrl(nombreArchivo);
+                const urlAvatar = datosUrlPublica.publicUrl;
                 // Actualizar usuario en la base
-                await upsertUser({ ...user.value, avatar_url: avatarUrl });
-                user.value.avatar_url = avatarUrl;
-                newAvatarFile.value = null;
+                await upsertUser({ ...usuario.value, avatar_url: urlAvatar });
+                usuario.value.avatar_url = urlAvatar;
+                archivoNuevoAvatar.value = null;
             } catch (err) {
-                error.value = 'Error al subir la imagen de perfil';
+                mensajeError.value = 'Error al subir la imagen de perfil';
             } finally {
-                uploading.value = false;
+                subiendoAvatar.value = false;
+            }
+        };
+
+        const abrirModalEdicion = () => {
+            if (usuario.value) {
+                datosEdicion.value = {
+                  nombreUsuario: usuario.value.username,
+                  descripcion: usuario.value.descripcion || ''
+                };
+                mostrarModalEdicion.value = true;
+            }
+        };
+        const cerrarModalEdicion = () => {
+            mostrarModalEdicion.value = false;
+        };
+        const guardarCambiosUsuario = async () => {
+            try {
+                cargando.value = true;
+                mensajeError.value = '';
+                // Construir el objeto a guardar
+                const datosActualizados = {
+                    id: usuario.value.id,
+                    email: usuario.value.email,
+                    username: datosEdicion.value.nombreUsuario,
+                    descripcion: datosEdicion.value.descripcion,
+                    avatar_url: usuario.value.avatar_url || null,
+                    status: usuario.value.status || 'online'
+                };
+                // Guardar en la base y actualizar el usuario local con la respuesta
+                const usuarioActualizado = await upsertUser(datosActualizados);
+                usuario.value = usuarioActualizado;
+                mostrarModalEdicion.value = false;
+            } catch (err) {
+                mensajeError.value = 'Error al actualizar los datos: ' + (err.message || err);
+            } finally {
+                cargando.value = false;
             }
         };
 
         return {
-            user,
-            loading,
-            error,
-            newAvatarFile,
-            uploading,
-            handleAvatarChange,
-            uploadNewAvatar,
-            avatarInput,
-            triggerAvatarInput,
-            hovering,
-            publicaciones
+            usuario,
+            cargando,
+            mensajeError,
+            archivoNuevoAvatar,
+            subiendoAvatar,
+            cambiarAvatar,
+            subirNuevoAvatar,
+            inputAvatar,
+            abrirInputAvatar,
+            cursorSobreAvatar,
+            listaPublicaciones,
+            mostrarModalEdicion,
+            datosEdicion,
+            abrirModalEdicion,
+            cerrarModalEdicion,
+            guardarCambiosUsuario
         };
     }
 };
@@ -97,65 +144,89 @@ export default {
                 <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-600 mb-6">
                   <div class="grid grid-cols-1 place-items-center gap-4 md:grid-cols-2 md:items-start">
                     <!-- Foto -->
-                    <div class="flex justify-center items-center pt-2 md:justify-start md:items-start">
-                        <div class="relative group" @mouseenter="hovering = true" @mouseleave="hovering = false">
+                    <div class="flex justify-center items-center pt-2 md:justify-center md:items-center min-h-[220px]">
+                        <div class="relative group mb-4" style="min-width: 200px; min-height: 200px;" @mouseenter="cursorSobreAvatar = true" @mouseleave="cursorSobreAvatar = false">
                             <Avatar
-                                :src="user?.avatar_url"
-                                :alt="'Avatar de ' + (user?.username || user?.email)"
-                                :fallback-initial="user?.username?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || '?'"
-                                img-class="rounded-full w-24 h-24 object-cover border-4 border-blue-300 dark:border-blue-700 shadow cursor-pointer"
-                                @click="triggerAvatarInput"
+                                :src="usuario?.avatar_url"
+                                :alt="'Avatar de ' + (usuario?.username || usuario?.email)"
+                                :fallback-initial="usuario?.username?.charAt(0)?.toUpperCase() || usuario?.email?.charAt(0)?.toUpperCase() || '?'"
+                                :claseImagen="'rounded-full w-48 h-48 object-cover border-4 border-blue-400 dark:border-blue-700 shadow cursor-pointer'"
+                                @click="abrirInputAvatar"
                             />
                             <input
-                                ref="avatarInput"
+                                ref="inputAvatar"
                                 type="file"
-                                id="new-avatar"
+                                id="nuevo-avatar"
                                 accept="image/*"
-                                @change="handleAvatarChange"
+                                @change="cambiarAvatar"
                                 class="hidden"
-                                :disabled="uploading"
+                                :disabled="subiendoAvatar"
                             />
-                            <div v-if="hovering && !uploading" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-pointer"
-                                @click="triggerAvatarInput">
+                            <div v-if="cursorSobreAvatar && !subiendoAvatar" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-pointer"
+                                @click="abrirInputAvatar">
                                 <span class="text-white text-center text-xs font-semibold select-none pointer-events-none">
-                                    {{ user?.avatar_url ? 'Editar imagen de perfil' : 'Añadir imagen de perfil' }}
+                                    {{ usuario?.avatar_url ? 'Editar imagen de perfil' : 'Añadir imagen de perfil' }}
                                 </span>
                             </div>
-                            <div v-if="uploading" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-wait">
+                            <div v-if="subiendoAvatar" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-wait">
                                 <span class="text-white text-center text-xs font-semibold select-none">Subiendo...</span>
                             </div>
                         </div>
                     </div>
                     <!-- Datos usuario y acciones -->
                     <div class="flex flex-col justify-start gap-1 items-start mt-2 w-full md:items-start md:mt-2">
-                        <span class="text-lg font-bold text-gray-900 dark:text-white break-all">{{ user?.username }}</span>
+                        <span class="text-lg font-bold text-gray-900 dark:text-white break-all">{{ usuario?.username }}</span>
                         <span class="text-base text-blue-700 dark:text-blue-300 break-all underline flex items-center">
                           <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
-                          <span class="hidden sm:inline">{{ user?.email }}</span>
+                          <span class="hidden sm:inline">{{ usuario?.email }}</span>
                         </span>
+                        <span v-if="usuario?.descripcion" class="text-gray-600 dark:text-gray-300 mb-2 block whitespace-pre-line">{{ usuario.descripcion }}</span>
                         <div class="flex flex-row gap-2 mt-2 w-full">
-                          <button @click="triggerAvatarInput" class="flex-1 px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">Editar</button>
+                          <button @click="abrirModalEdicion" class="flex-1 px-2 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">Editar</button>
                           <button @click="handleLogout" class="flex-1 px-2 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50">Cerrar sesión</button>
                         </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Modal de edición de usuario -->
+                <div v-if="mostrarModalEdicion" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 w-full max-w-md relative">
+                    <button @click="cerrarModalEdicion" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 dark:hover:text-white text-2xl">&times;</button>
+                    <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Editar perfil</h2>
+                    <div class="mb-4">
+                      <label class="block text-gray-700 dark:text-gray-300 mb-1">Nombre de usuario</label>
+                      <input v-model="datosEdicion.nombreUsuario" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200" />
+                    </div>
+                    <div class="mb-4">
+                      <label class="block text-gray-700 dark:text-gray-300 mb-1">Correo electrónico</label>
+                      <input :value="usuario?.email" type="email" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed" readonly />
+                    </div>
+                    <div class="mb-4">
+                      <label class="block text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                      <textarea v-model="datosEdicion.descripcion" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200" placeholder="Contanos algo sobre vos..."></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                      <button @click="cerrarModalEdicion" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
+                      <button @click="guardarCambiosUsuario" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Guardar</button>
                     </div>
                   </div>
                 </div>
                 <!-- Publicaciones -->
                 <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-600">
                     <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Publicaciones</h3>
-                    <div v-if="publicaciones.length === 0" class="text-center text-gray-500 dark:text-gray-400">No hay publicaciones aún.</div>
+                    <div v-if="listaPublicaciones.length === 0" class="text-center text-gray-500 dark:text-gray-400">No hay publicaciones aún.</div>
                     <ul v-else class="flex flex-col gap-4">
-                        <li v-for="pub in publicaciones" :key="pub.id" class="bg-blue-50 dark:bg-gray-800 rounded-lg p-4 shadow">
+                        <li v-for="pub in listaPublicaciones" :key="pub.id" class="bg-blue-50 dark:bg-gray-800 rounded-lg p-4 shadow">
                             <div class="flex items-center gap-3 mb-2">
                                 <Avatar
-                                  :src="user?.avatar_url"
-                                  :alt="'Avatar de ' + (user?.username || user?.email)"
-                                  :fallback-initial="user?.username?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || '?'"
+                                  :src="usuario?.avatar_url"
+                                  :alt="'Avatar de ' + (usuario?.username || usuario?.email)"
+                                  :fallback-initial="usuario?.username?.charAt(0)?.toUpperCase() || usuario?.email?.charAt(0)?.toUpperCase() || '?'"
                                   img-class="h-8 w-8 rounded-full object-cover border-2 border-blue-400"
                                 />
-                                <span class="font-semibold text-primary-700 dark:text-primary-400">{{ user?.username }}</span>
+                                <span class="font-semibold text-primary-700 dark:text-primary-400">{{ usuario?.username }}</span>
                                 <span class="text-xs text-gray-500 ml-auto">{{ new Date(pub.created_at).toLocaleString() }}</span>
                             </div>
                             <div class="text-gray-900 dark:text-white">{{ pub.body }}</div>

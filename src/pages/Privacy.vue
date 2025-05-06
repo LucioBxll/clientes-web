@@ -75,7 +75,7 @@
 
 <script>
 export default {
-  name: 'Privacy',
+  name: 'Privacidad',
   metaInfo: {
     title: 'Política de Privacidad'
   }
