@@ -3,24 +3,118 @@
     <slot name="avatar" />
     <article class="flex-1">
       <header class="font-semibold text-primary-700 dark:text-primary-400">
-        {{ mensaje.username }}
+        <router-link
+          :to="'/perfil/' + mensaje.user_id"
+          :title="mensaje.username ? mensaje.username + ' ( @' + (mensaje.username || mensaje.email?.split('@')[0]) + ' )' : mensaje.email"
+          class="cursor-pointer hover:underline"
+        >
+          {{ mensaje.username }}
+        </router-link>
       </header>
       <p class="text-secondary-600 dark:text-gray-300 break-words">{{ mensaje.body }}</p>
       <img v-if="mensaje.image_url" :src="mensaje.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-200 dark:border-gray-600" />
-      <footer>
+      <footer class="flex items-center gap-4 mt-2">
         <time class="text-xs md:text-sm text-secondary-400 dark:text-gray-500" :datetime="mensaje.created_at">
           {{ new Date(mensaje.created_at).toLocaleString() }}
         </time>
+        <button @click="toggleComments" class="ml-auto text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+          {{ showComments ? 'Ocultar comentarios' : 'Comentar' }}
+        </button>
       </footer>
+      <div v-if="showComments" class="mt-3">
+        <div v-if="cargandoComentarios" class="text-xs text-gray-500">Cargando comentarios...</div>
+        <ul v-else class="space-y-2 mb-2">
+          <li v-for="comentario in comentarios" :key="comentario.id" class="flex items-start gap-2">
+            <Avatar :src="comentario.avatar_url" :alt="'Avatar de ' + comentario.username" :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" img-class="h-7 w-7 rounded-full object-cover border border-blue-300" />
+            <div>
+              <span class="font-semibold text-xs text-primary-700 dark:text-primary-400">{{ comentario.username }}</span>
+              <span class="text-xs text-gray-400 ml-1">{{ new Date(comentario.created_at).toLocaleString() }}</span>
+              <div class="text-xs text-gray-700 dark:text-gray-200">{{ comentario.body }}</div>
+            </div>
+          </li>
+        </ul>
+        <form v-if="usuarioActual" @submit.prevent="enviarComentario" class="flex items-end gap-2 mt-2">
+          <input v-model="nuevoComentario" type="text" placeholder="Escribe un comentario..." class="flex-1 p-1 rounded border border-gray-300 dark:border-gray-600 text-xs bg-white dark:bg-gray-800" :disabled="enviandoComentario" />
+          <button type="submit" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded disabled:opacity-50" :disabled="enviandoComentario || !nuevoComentario.trim()">Comentar</button>
+        </form>
+        <div v-if="errorComentario" class="text-xs text-red-500 mt-1">{{ errorComentario }}</div>
+      </div>
     </article>
   </li>
 </template>
 
 <script>
+import { ref } from 'vue';
+import Avatar from './Avatar.vue';
+import { agregarComentarioAGlobalChat, obtenerComentariosDeMensaje } from '../services/global-chat';
+import { getCurrentUser } from '../services/auth';
+
 export default {
   name: 'MessageItem',
+  components: { Avatar },
   props: {
     mensaje: Object
+  },
+  setup(props) {
+    const showComments = ref(false);
+    const comentarios = ref([]);
+    const nuevoComentario = ref('');
+    const cargandoComentarios = ref(false);
+    const enviandoComentario = ref(false);
+    const usuarioActual = ref(null);
+    const errorComentario = ref(null);
+
+    const cargarComentarios = async () => {
+      cargandoComentarios.value = true;
+      try {
+        comentarios.value = await obtenerComentariosDeMensaje(props.mensaje.id);
+      } catch (e) {
+        comentarios.value = [];
+      } finally {
+        cargandoComentarios.value = false;
+      }
+    };
+
+    const toggleComments = async () => {
+      showComments.value = !showComments.value;
+      if (showComments.value && comentarios.value.length === 0) {
+        await cargarComentarios();
+      }
+      if (!usuarioActual.value) {
+        usuarioActual.value = await getCurrentUser();
+      }
+    };
+
+    const enviarComentario = async () => {
+      if (!usuarioActual.value) {
+        errorComentario.value = 'Debes iniciar sesión para comentar.';
+        return;
+      }
+      if (!nuevoComentario.value.trim()) return;
+      enviandoComentario.value = true;
+      errorComentario.value = null;
+      try {
+        await agregarComentarioAGlobalChat(props.mensaje.id, nuevoComentario.value, usuarioActual.value);
+        nuevoComentario.value = '';
+        await cargarComentarios();
+      } catch (e) {
+        errorComentario.value = 'Error al comentar.';
+      } finally {
+        enviandoComentario.value = false;
+      }
+    };
+
+    return {
+      showComments,
+      comentarios,
+      nuevoComentario,
+      cargandoComentarios,
+      enviandoComentario,
+      usuarioActual,
+      errorComentario,
+      toggleComments,
+      enviarComentario
+    };
   }
-}
+};
 </script> 

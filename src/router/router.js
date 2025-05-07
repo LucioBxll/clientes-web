@@ -17,6 +17,7 @@ const routes = [
         component: () => import('../pages/Profile.vue'),
         meta: { requiresAuth: true }
     },
+    { path: '/perfil/:id', component: () => import('../pages/ProfileFeed.vue') },
     { path: '/terminos',        component: () => import('../pages/Terms.vue'), },
     { path: '/privacidad',      component: () => import('../pages/Privacy.vue'), },
     { path: '/calendario',      component: () => import('../pages/Calendar.vue'), },

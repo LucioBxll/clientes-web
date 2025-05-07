@@ -42,7 +42,7 @@ export async function loadLastGlobalChatMessages() {
             throw error;
         }
 
-        return data.reverse(); // Invertimos el orden para mostrar los más antiguos primero
+        return data; // Ya no invertimos el orden, los más nuevos van primero
     } catch (error) {
         console.error('[global-chat.js loadLastGlobalChatMessage] Error: ', error);
         throw error;
@@ -59,7 +59,7 @@ export async function saveGlobalChatMessage(data) {
     try {
         // Verificar que el usuario esté autenticado
         const currentUser = await getCurrentUser();
-        if (!currentUser.id) {
+        if (!currentUser || !currentUser.id) {
             throw new Error('Usuario no autenticado');
         }
 
@@ -183,6 +183,35 @@ export async function deleteMessage(messageId) {
         console.error('[global-chat.js deleteMessage] Error: ', error);
         throw error;
     }
+}
+
+// Agregar un comentario a una publicación del chat global
+export async function agregarComentarioAGlobalChat(mensajeId, comentario, usuario) {
+    const { data, error } = await supabase
+        .from('global_chat_comments')
+        .insert({
+            mensaje_id: mensajeId,
+            user_id: usuario.id,
+            username: usuario.username || usuario.email.split('@')[0],
+            body: comentario,
+            created_at: new Date().toISOString(),
+            avatar_url: usuario.avatar_url || null
+        })
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
+}
+
+// Obtener comentarios de una publicación
+export async function obtenerComentariosDeMensaje(mensajeId) {
+    const { data, error } = await supabase
+        .from('global_chat_comments')
+        .select('*')
+        .eq('mensaje_id', mensajeId)
+        .order('created_at', { ascending: true });
+    if (error) throw error;
+    return data;
 }
 
 // Versión con "Broadcast".
