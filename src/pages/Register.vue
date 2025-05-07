@@ -3,10 +3,14 @@ import MainH1 from '../components/MainH1.vue';
 import { register } from '../services/auth';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import BaseInput from '../components/BaseInput.vue';
+import BaseButton from '../components/BaseButton.vue';
+import BaseAlert from '../components/BaseAlert.vue';
+import BaseSuccess from '../components/BaseSuccess.vue';
 
 export default {
     name: 'Registro',
-    components: { MainH1 },
+    components: { MainH1, BaseInput, BaseButton, BaseAlert, BaseSuccess },
     setup() {
         const enrutador = useRouter();
         const correo = ref('');
@@ -14,6 +18,7 @@ export default {
         const nombreUsuario = ref('');
         const archivoAvatar = ref(null);
         const mensajeError = ref('');
+        const mensajeSuccess = ref('');
         const cargando = ref(false);
         const exito = ref(false);
 
@@ -31,6 +36,7 @@ export default {
         const enviarFormulario = async () => {
             if (!formularioValido.value) {
                 mensajeError.value = 'Por favor, completa todos los campos correctamente';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
                 return;
             }
 
@@ -40,15 +46,18 @@ export default {
             try {
                 await register(correo.value, contrasena.value, nombreUsuario.value, archivoAvatar.value);
                 exito.value = true;
+                mensajeSuccess.value = '¡Cuenta creada exitosamente! Redirigiendo al inicio de sesión...';
                 correo.value = '';
                 contrasena.value = '';
                 nombreUsuario.value = '';
                 archivoAvatar.value = null;
                 setTimeout(() => {
+                    mensajeSuccess.value = '';
                     enrutador.push('/ingresar');
-                }, 2000);
+                }, 4000);
             } catch (err) {
                 mensajeError.value = err.message || 'Error al crear la cuenta. Por favor, intenta nuevamente.';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
             } finally {
                 cargando.value = false;
             }
@@ -60,6 +69,7 @@ export default {
             nombreUsuario,
             archivoAvatar,
             mensajeError,
+            mensajeSuccess,
             cargando,
             exito,
             formularioValido,
@@ -79,51 +89,34 @@ export default {
             @submit.prevent="enviarFormulario"
             class="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-all duration-200"
         >
+            <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
+            <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
             <div class="mb-6">
-                <input
+                <BaseInput
                     type="text"
-                    id="nombreUsuario"
-                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                           placeholder-gray-500 dark:placeholder-gray-400
-                           transition-all duration-200"
+                    :placeholder="'Nombre de usuario'"
                     v-model="nombreUsuario"
-                    required
-                    placeholder="Nombre de usuario"
                     :disabled="cargando"
-                >
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                />
             </div>
             <div class="mb-6">
-                <input
+                <BaseInput
                     type="email"
-                    id="correo"
-                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                           placeholder-gray-500 dark:placeholder-gray-400
-                           transition-all duration-200"
+                    :placeholder="'Correo electrónico'"
                     v-model="correo"
-                    required
-                    placeholder="Correo electrónico"
                     :disabled="cargando"
-                >
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                />
             </div>
             <div class="mb-6">
-                <input
+                <BaseInput
                     type="password"
-                    id="contrasena"
-                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                           placeholder-gray-500 dark:placeholder-gray-400
-                           transition-all duration-200"
+                    :placeholder="'Contraseña'"
                     v-model="contrasena"
-                    required
-                    minlength="6"
-                    placeholder="Contraseña"
                     :disabled="cargando"
-                >
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                />
             </div>
             <div class="mb-6">
                 <label for="avatar" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Imagen de perfil (opcional)</label>
@@ -136,25 +129,13 @@ export default {
                     class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
             </div>
-            <div v-if="mensajeError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                <p class="text-red-600 dark:text-red-400 text-sm">{{ mensajeError }}</p>
-            </div>
-            <div v-if="exito" class="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-                <p class="text-green-600 dark:text-green-400 text-sm">
-                    ¡Cuenta creada exitosamente! Por favor, verifica tu correo electrónico para activar tu cuenta.
-                </p>
-            </div>
-            <button 
-                type="submit" 
-                class="w-full p-3 rounded-lg bg-blue-600 dark:bg-blue-500 
-                       hover:bg-blue-500 dark:hover:bg-blue-400 
-                       focus:bg-blue-500 dark:focus:bg-blue-400 
-                       active:bg-blue-700 dark:active:bg-blue-600 
-                       text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            <BaseButton 
+                type="submit"
                 :disabled="!formularioValido || cargando"
+                buttonClass="w-full p-3 rounded-lg bg-blue-600 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-400 focus:bg-blue-500 dark:focus:bg-blue-400 active:bg-blue-700 dark:active:bg-blue-600 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {{ cargando ? 'Creando cuenta...' : 'Crear cuenta' }}
-            </button>
+            </BaseButton>
         </form>
     </div>
 </template>

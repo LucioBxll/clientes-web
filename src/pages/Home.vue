@@ -2,6 +2,8 @@
 import MainH1 from '../components/MainH1.vue';
 import { AcademicCapIcon, CalendarIcon, ChatBubbleLeftRightIcon, BookOpenIcon } from '@heroicons/vue/24/outline';
 import { getCurrentUser } from '../services/auth';
+import BaseAlert from '../components/BaseAlert.vue';
+import BaseSuccess from '../components/BaseSuccess.vue';
 
 export default {
     name: 'Inicio',
@@ -10,11 +12,15 @@ export default {
         AcademicCapIcon,
         CalendarIcon,
         ChatBubbleLeftRightIcon,
-        BookOpenIcon
+        BookOpenIcon,
+        BaseAlert,
+        BaseSuccess
     },
     data() {
         return {
             usuario: null,
+            mensajeError: '',
+            mensajeSuccess: '',
             novedadesDestacadas: [
                 {
                     id: 1,
@@ -118,7 +124,8 @@ export default {
         async agregarComentario(novedad) {
             if (novedad.nuevoComentario.trim()) {
                 if (!this.usuario) {
-                    alert('Debes iniciar sesión para comentar');
+                    this.mensajeError = 'Debes iniciar sesión para comentar.';
+                    setTimeout(() => { this.mensajeError = ''; }, 4000);
                     return;
                 }
 
@@ -128,11 +135,14 @@ export default {
                     texto: novedad.nuevoComentario
                 });
                 novedad.nuevoComentario = '';
+                this.mensajeSuccess = 'Comentario agregado correctamente.';
+                setTimeout(() => { this.mensajeSuccess = ''; }, 4000);
             }
         },
         guardarComoFechaImportante(novedad) {
             if (!this.usuario) {
-                alert('Debes iniciar sesión para guardar eventos');
+                this.mensajeError = 'Debes iniciar sesión para guardar eventos.';
+                setTimeout(() => { this.mensajeError = ''; }, 4000);
                 return;
             }
 
@@ -148,7 +158,8 @@ export default {
             eventosGuardados.push(evento);
             localStorage.setItem('eventosCalendario', JSON.stringify(eventosGuardados));
             
-            alert('Evento guardado en el calendario');
+            this.mensajeSuccess = 'Evento guardado en el calendario.';
+            setTimeout(() => { this.mensajeSuccess = ''; }, 4000);
         }
     },
     async mounted() {
@@ -160,6 +171,8 @@ export default {
 <template>
     <div class="w-full bg-blue-50 dark:bg-gray-900">
         <div class="container mx-auto">
+            <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
+            <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
             <!-- Hero Section -->
             <div class="px-4 sm:px-6 lg:px-8 py-8">
                 <section class="text-center py-12 px-4 mb-12 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 text-white rounded-lg">

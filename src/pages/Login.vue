@@ -2,10 +2,14 @@
 import MainH1 from '../components/MainH1.vue';
 import { login } from '../services/auth';
 import { useRouter } from 'vue-router';
+import BaseInput from '../components/BaseInput.vue';
+import BaseButton from '../components/BaseButton.vue';
+import BaseAlert from '../components/BaseAlert.vue';
+import BaseSuccess from '../components/BaseSuccess.vue';
 
 export default {
     name: 'IniciarSesion',
-    components: { MainH1 },
+    components: { MainH1, BaseInput, BaseButton, BaseAlert, BaseSuccess },
     setup() {
         const enrutador = useRouter();
         return { enrutador };
@@ -17,7 +21,8 @@ export default {
                 contrasena: '',
             },
             cargando: false,
-            mensajeError: null
+            mensajeError: null,
+            mensajeSuccess: null
         }
     },
     methods: {
@@ -25,12 +30,17 @@ export default {
             try {
                 this.cargando = true;
                 this.mensajeError = null;
+                this.mensajeSuccess = null;
                 await login(this.credenciales.correo, this.credenciales.contrasena);
                 this.cargando = false;
-                // Redirigir al perfil después del login exitoso
-                this.enrutador.push('/perfil');
+                this.mensajeSuccess = '¡Inicio de sesión exitoso! Redirigiendo...';
+                setTimeout(() => {
+                  this.mensajeSuccess = null;
+                  this.enrutador.push('/perfil');
+                }, 4000);
             } catch (error) {
                 this.mensajeError = error.message || 'Error al iniciar sesión';
+                setTimeout(() => { this.mensajeError = null; }, 4000);
                 this.cargando = false;
             }
         }
@@ -47,52 +57,33 @@ export default {
             @submit.prevent="enviarFormulario"
             class="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-all duration-200"
         >
+            <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
+            <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
             <div class="mb-6">
-                <input
+                <BaseInput
                     type="email"
-                    id="correo"
-                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                           placeholder-gray-500 dark:placeholder-gray-400
-                           transition-all duration-200"
+                    :placeholder="'Correo electrónico'"
                     v-model="credenciales.correo"
-                    placeholder="Correo electrónico"
                     :disabled="cargando"
-                >
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                />
             </div>
             <div class="mb-6">
-                <input
+                <BaseInput
                     type="password"
-                    id="contrasena"
-                    class="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg 
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                           placeholder-gray-500 dark:placeholder-gray-400
-                           transition-all duration-200"
+                    :placeholder="'Contraseña'"
                     v-model="credenciales.contrasena"
-                    placeholder="Contraseña"
                     :disabled="cargando"
-                >
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                />
             </div>
-            
-            <!-- Mensaje de error -->
-            <div v-if="mensajeError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                <p class="text-red-600 dark:text-red-400 text-sm">{{ mensajeError }}</p>
-            </div>
-
-            <button 
-                type="submit" 
-                class="w-full p-3 rounded-lg bg-blue-600 dark:bg-blue-500 
-                       hover:bg-blue-500 dark:hover:bg-blue-400 
-                       focus:bg-blue-500 dark:focus:bg-blue-400 
-                       active:bg-blue-700 dark:active:bg-blue-600 
-                       text-white transition-all duration-200
-                       disabled:opacity-50 disabled:cursor-not-allowed"
+            <BaseButton 
+                type="submit"
                 :disabled="cargando"
+                buttonClass="w-full p-3 rounded-lg bg-blue-600 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-400 focus:bg-blue-500 dark:focus:bg-blue-400 active:bg-blue-700 dark:active:bg-blue-600 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {{ cargando ? 'Iniciando sesión...' : 'Ingresar' }}
-            </button>
+            </BaseButton>
         </form>
     </div>
 </template>
