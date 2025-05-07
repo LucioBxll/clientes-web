@@ -4,7 +4,7 @@ import { getCurrentUser } from '../services/auth';
 
 // Definimos la lista de rutas de nuestra aplicación.
 const routes = [
-    { path: '/',                component: () => import('../pages/Home.vue'), },
+    { path: '/', component: () => import('../pages/GlobalChat.vue') },
     { 
         path: '/chat-global',     
         component: () => import('../pages/GlobalChat.vue'),
@@ -21,7 +21,7 @@ const routes = [
     { path: '/privacidad',      component: () => import('../pages/Privacy.vue'), },
     { path: '/calendario',      component: () => import('../pages/Calendar.vue'), },
     { path: '/blog', component: () => import('../pages/Blog.vue'), },
-    { path: '/novedades', component: () => import('../pages/Novedades.vue'), },
+    { path: '/novedades', component: () => import('../pages/Home.vue') },
 ];
 
 // Creamos el router con createRouter.

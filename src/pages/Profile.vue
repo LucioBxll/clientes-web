@@ -236,6 +236,7 @@ export default {
                                     <span class="text-xs text-gray-500 ml-auto">{{ new Date(pub.created_at).toLocaleString() }}</span>
                                 </div>
                                 <div class="text-gray-900 dark:text-white">{{ pub.body }}</div>
+                                <img v-if="pub.image_url" :src="pub.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-200 dark:border-gray-600" />
                             </li>
                         </ul>
                     </div>

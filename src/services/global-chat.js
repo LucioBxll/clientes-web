@@ -33,7 +33,7 @@ export async function loadLastGlobalChatMessages() {
     try {
         const { data, error } = await supabase
             .from('global_chat')
-            .select('id, username, body, created_at, user_id')
+            .select('id, username, body, created_at, user_id, image_url')
             .order('created_at', { ascending: false })
             .limit(50);
 
@@ -77,9 +77,10 @@ export async function saveGlobalChatMessage(data) {
                 email: currentUser.email,
                 username: currentUser.username || currentUser.email.split('@')[0],
                 body: data.body,
-                user_id: currentUser.id
+                user_id: currentUser.id,
+                image_url: data.image_url || null
             })
-            .select('id, username, body, created_at, user_id')
+            .select('id, username, body, created_at, user_id, image_url')
             .single();
 
         if(error) {

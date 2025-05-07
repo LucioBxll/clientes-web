@@ -6,6 +6,7 @@
         {{ mensaje.username }}
       </header>
       <p class="text-secondary-600 dark:text-gray-300 break-words">{{ mensaje.body }}</p>
+      <img v-if="mensaje.image_url" :src="mensaje.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-200 dark:border-gray-600" />
       <footer>
         <time class="text-xs md:text-sm text-secondary-400 dark:text-gray-500" :datetime="mensaje.created_at">
           {{ new Date(mensaje.created_at).toLocaleString() }}
