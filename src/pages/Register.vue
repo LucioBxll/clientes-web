@@ -81,13 +81,13 @@ export default {
 </script>
 
 <template>
-    <div class="w-full bg-blue-50 dark:bg-gray-900 py-8">
+    <div class="w-full bg-esmerald-50 dark:bg-neutral-950 py-8">
         <MainH1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">Crear una nueva cuenta</MainH1>
 
         <form 
             action="#"
             @submit.prevent="enviarFormulario"
-            class="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-all duration-200"
+            class="max-w-md mx-auto p-6 bg-emerald-200 dark:bg-emerald-400 rounded-lg shadow-sm transition-all duration-200"
         >
             <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
             <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
@@ -97,7 +97,7 @@ export default {
                     :placeholder="'Nombre de usuario'"
                     v-model="nombreUsuario"
                     :disabled="cargando"
-                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
                 />
             </div>
             <div class="mb-6">
@@ -106,7 +106,7 @@ export default {
                     :placeholder="'Correo electrónico'"
                     v-model="correo"
                     :disabled="cargando"
-                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
                 />
             </div>
             <div class="mb-6">
@@ -115,7 +115,7 @@ export default {
                     :placeholder="'Contraseña'"
                     v-model="contrasena"
                     :disabled="cargando"
-                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
                 />
             </div>
             <div class="mb-6">
@@ -126,13 +126,13 @@ export default {
                     accept="image/*"
                     @change="cambiarAvatar"
                     :disabled="cargando"
-                    class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white"
                 >
             </div>
             <BaseButton 
                 type="submit"
                 :disabled="!formularioValido || cargando"
-                buttonClass="w-full p-3 rounded-lg bg-blue-600 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-400 focus:bg-blue-500 dark:focus:bg-blue-400 active:bg-blue-700 dark:active:bg-blue-600 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                buttonClass="w-full p-3 rounded-lg bg-gray-900 dark:bg-neutral-950 hover:bg-gray-900 dark:hover:bg-emerald-800 focus:bg-gray-900 dark:focus:bg-gray-900 active:bg-blue-700 dark:active:bg-blue-600 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {{ cargando ? 'Creando cuenta...' : 'Crear cuenta' }}
             </BaseButton>

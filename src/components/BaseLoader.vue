@@ -1,6 +1,6 @@
 <template>
-  <div class="flex justify-center items-center w-full h-full py-8">
-    <span class="loader"></span>
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-emerald-600/80">
+    <span class="loader-text font-lovelo-line-bold">MINIMA</span>
   </div>
 </template>
 
@@ -11,22 +11,26 @@ export default {
 </script>
 
 <style scoped>
-.loader {
-  width: 3rem;
-  height: 3rem;
-  border: 4px solid #cbd5e1; /* slate-300 */
-  border-top: 4px solid #2563eb; /* blue-600 */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  display: inline-block;
+.loader-text {
+  font-size: 3rem;
+  font-family: 'Lovelo', 'Arial', sans-serif;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  color: #111;
+  background: linear-gradient(90deg, #10b981 50%, #111 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fillGreen 1.5s linear infinite;
 }
-@media (prefers-color-scheme: dark) {
-  .loader {
-    border: 4px solid #334155; /* slate-700 */
-    border-top: 4px solid #60a5fa; /* blue-400 */
+
+@keyframes fillGreen {
+  0% {
+    background-position: 100% 0;
   }
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  100% {
+    background-position: 0 0;
+  }
 }
 </style> 

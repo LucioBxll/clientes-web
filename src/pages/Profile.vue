@@ -1,6 +1,6 @@
 <script>
 import { ref, onMounted } from 'vue';
-import { getCurrentUser } from '../services/auth';
+import { getCurrentUser, logout } from '../services/auth';
 import Avatar from '../components/Avatar.vue';
 import supabase from '../services/supabase';
 import { upsertUser } from '../services/users';
@@ -28,6 +28,7 @@ export default {
         const datosEdicion = ref({ nombreUsuario: '', descripcion: '', email: '' });
 
         onMounted(async () => {
+            const inicio = Date.now();
             try {
                 usuario.value = await getCurrentUser();
                 // Traer mensajes del chat global de este usuario
@@ -45,7 +46,9 @@ export default {
                 mensajeError.value = 'Error al cargar el perfil';
                 setTimeout(() => { mensajeError.value = ''; }, 4000);
             } finally {
-                cargando.value = false;
+                const duracion = Date.now() - inicio;
+                const restante = 3000 - duracion;
+                setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
             }
         });
 
@@ -107,6 +110,7 @@ export default {
             mostrarModalEdicion.value = false;
         };
         const guardarCambiosUsuario = async (form) => {
+            const inicio = Date.now();
             try {
                 cargando.value = true;
                 mensajeError.value = '';
@@ -130,7 +134,19 @@ export default {
                 mensajeError.value = 'Error al actualizar los datos: ' + (err.message || err);
                 setTimeout(() => { mensajeError.value = ''; }, 4000);
             } finally {
-                cargando.value = false;
+                const duracion = Date.now() - inicio;
+                const restante = 3000 - duracion;
+                setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
+            }
+        };
+
+        const handleLogout = async () => {
+            try {
+                await logout();
+                window.location.href = '/ingresar';
+            } catch (error) {
+                mensajeError.value = 'Error al cerrar sesión';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
             }
         };
 
@@ -151,22 +167,23 @@ export default {
             datosEdicion,
             abrirModalEdicion,
             cerrarModalEdicion,
-            guardarCambiosUsuario
+            guardarCambiosUsuario,
+            handleLogout
         };
     }
 };
 </script>
 
 <template>
-    <div class="w-full py-8" :style="{'background-color': 'var(--color-primary)'}" dark:bg-gray-900>
+    <div class="w-full py-8 bg-emerald-50 dark:bg-neutral-950">
         <div class="max-w-3xl mx-auto">
             <BaseLoader v-if="cargando" />
             <template v-else>
                 <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
                 <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden transition-all duration-200 p-6">
+                <div class="bg-emerald-400  shadow rounded-lg overflow-hidden transition-all duration-200 p-6">
                     <!-- Tarjeta superior: foto + datos + acciones -->
-                    <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-600 mb-6">
+                    <div class="bg-emerald-50 dark:bg-neutral-950 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-600 mb-6">
                       <div class="grid grid-cols-1 place-items-center gap-4 md:grid-cols-2 md:items-start">
                         <!-- Foto -->
                         <div class="flex justify-center items-center pt-2 md:justify-center md:items-center min-h-[220px]">
@@ -220,11 +237,11 @@ export default {
                       <ProfileForm :value="datosEdicion" @guardar="guardarCambiosUsuario" @cancelar="cerrarModalEdicion" />
                     </BaseModal>
                     <!-- Publicaciones -->
-                    <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-600">
+                    <div class="bg-emerald-50 dark:bg-neutral-950 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-600">
                         <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Publicaciones</h3>
                         <div v-if="listaPublicaciones.length === 0" class="text-center text-gray-500 dark:text-gray-400">No hay publicaciones aún.</div>
                         <ul v-else class="flex flex-col gap-4">
-                            <li v-for="pub in listaPublicaciones" :key="pub.id" class="bg-emerald-50 dark:bg-gray-800 rounded-lg p-4 shadow">
+                            <li v-for="pub in listaPublicaciones" :key="pub.id" class="bg-emerald-50 dark:bg-neutral-900 rounded-lg p-4 shadow">
                                 <div class="flex items-center gap-3 mb-2">
                                     <Avatar
                                       :src="usuario?.avatar_url"

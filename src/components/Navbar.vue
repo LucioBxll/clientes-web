@@ -45,8 +45,6 @@ export default {
 
     const enlacesNavegacion = ref([
       { nombre: 'Inicio', ruta: '/' },
-      { nombre: 'Novedades', ruta: '/novedades' },
-      { nombre: 'Chat Global', ruta: '/chat-global', requiereAuth: true },
       { nombre: 'Iniciar Sesión', ruta: '/ingresar', requiereAuth: false },
       { nombre: 'Registrarse', ruta: '/registro', requiereAuth: false }
     ]);
@@ -93,12 +91,12 @@ export default {
 </script>
 
 <template>
-  <nav class="bg-primary-50 dark:bg-gray-800 shadow-sm border-b border-primary-100 dark:border-gray-700 transition-colors duration-200" :style="{'background-color': 'var(--color-primary)'}">
+  <nav class="bg-esmerald-50 dark:bg-neutral-950 shadow-sm border-b border-primary-100 dark:border-gray-700 transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
           <router-link to="/" class="flex items-center">
-            <img src="../public/logo.svg" alt="Logo" class="h-8 w-8 mr-2" />
+            <img src="/public/images/logo-minima.png" alt="Logo" class="h-8 w-8 mr-2" />
             <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors font-lovelo-line-bold">minima</span>
           </router-link>
         </div>
@@ -124,41 +122,18 @@ export default {
           
           <!-- Menú de perfil -->
           <div class="relative" v-if="usuario.id" ref="refMenuPerfil">
-            <button
-              @click="alternarMenuPerfil"
+            <router-link
+              to="/perfil"
               class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
             >
-              <span class="sr-only">Abrir menú de usuario</span>
+              <span class="sr-only">Ir a mi perfil</span>
               <Avatar
                 :src="usuario.avatar_url"
                 :alt="'Avatar de ' + (usuario.username || usuario.email)"
                 :fallback-initial="usuario.username?.charAt(0)?.toUpperCase() || usuario.email?.charAt(0)?.toUpperCase() || '?'"
                 img-class="h-8 w-8 rounded-full object-cover border-2 border-emerald-400"
               />
-            </button>
-            <!-- Menú desplegable -->
-            <div
-              v-show="menuPerfilAbierto"
-              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="user-menu"
-            >
-              <router-link
-                to="/perfil"
-                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                role="menuitem"
-              >
-                Mi Perfil
-              </router-link>
-              <button
-                @click="cerrarSesion"
-                class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                role="menuitem"
-              >
-                Cerrar sesión
-              </button>
-            </div>
+            </router-link>
           </div>
           
           <!-- Botón de tema -->
@@ -211,7 +186,7 @@ export default {
         <!-- Fondo oscuro -->
         <div class="fixed inset-0 bg-black bg-opacity-40" @click="alternarMenu"></div>
         <!-- Panel lateral -->
-        <div class="ml-auto w-72 max-w-full h-full bg-primary-50 dark:bg-gray-800 shadow-lg flex flex-col relative animate-slide-in-right" :style="{'background-color': 'var(--color-primary)'}">
+        <div class="ml-auto w-72 max-w-full h-full bg-primary-50 dark:bg-gray-800 shadow-lg flex flex-col relative animate-slide-in-right">
           <!-- Logo -->
           <div class="flex items-center justify-between px-4 py-4 border-b border-primary-100 dark:border-gray-700">
             <router-link to="/" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors font-lovelo-line-bold">

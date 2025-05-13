@@ -14,7 +14,7 @@ export default {
     src: { type: String, default: null },
     alt: { type: String, default: 'Avatar' },
     inicialFallback: { type: String, default: '?' },
-    claseImagen: { type: String, default: 'rounded-full w-10 h-10 object-cover object-center border-2 border-blue-400' }
+    claseImagen: { type: String, default: 'rounded-full w-10 h-10 object-cover object-center border-2 border-emerald-200 dark:border-emerald-600' }
   },
   methods: {
     alError(e) {

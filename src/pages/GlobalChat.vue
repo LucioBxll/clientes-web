@@ -125,24 +125,21 @@ export default {
         }
     },
     async mounted() {
+        const inicio = Date.now();
         try {
             // Obtener el usuario actual
             this.usuarioActual = await getCurrentUser();
-
             // Cargar usuarios sugeridos (excluyendo el actual)
             const todos = await getAllUsers();
             this.usuariosSugeridos = todos
                 .filter(u => !this.usuarioActual || u.id !== this.usuarioActual.id)
                 .slice(0, 3);
-
             // Suscribirse a cambios de autenticación
             subscribeToUserState(async (user) => {
                 this.usuarioActual = user;
             });
-
             // Suscribirse a nuevos mensajes
             subscribeToGlobalChatNewMessages(this.manejarNuevoMensaje);
-
             // Cargar mensajes existentes
             this.mensajes = await loadLastGlobalChatMessages();
             // Precargar los usuarios (y avatares) de los mensajes
@@ -156,27 +153,25 @@ export default {
             console.error('Error al cargar el chat:', error);
             this.mensajeError = 'Error al cargar el chat: ' + (error.message || 'Error desconocido');
             setTimeout(() => { this.mensajeError = null; }, 4000);
+        } finally {
+            const duracion = Date.now() - inicio;
+            const restante = 3000 - duracion;
+            setTimeout(() => { this.cargando = false; }, restante > 0 ? restante : 0);
         }
     }
 }
 </script>
 
 <template>
-  <div class="min-h-screen flex" :style="{'background-color': 'var(--color-background)', 'color': 'var(--color-text)'}">
+  <div class="min-h-screen flex bg-emerald-50 dark:bg-neutral-950">
     <!-- Sidebar izquierdo: Estático -->
-    <aside class="hidden md:flex flex-col w-1/5 border-r border-gray-800 bg-black p-4 h-screen sticky top-0">
+    <aside class="hidden md:flex flex-col w-1/5 border-r border-gray-800 bg-esmerald-50 dark:bg-neutral-950 p-4 h-screen sticky top-0">
       <nav class="flex flex-col gap-4">
         <router-link to="/" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>🏠</span> Inicio
         </router-link>
         <router-link to="/chat-global" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>💬</span> Chat Global
-        </router-link>
-        <router-link to="/blog" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
-          <span>📝</span> Blog
-        </router-link>
-        <router-link to="/calendario" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
-          <span>📅</span> Calendario
         </router-link>
         <router-link to="/perfil" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>👤</span> Perfil
@@ -188,7 +183,7 @@ export default {
     <main class="flex-1 flex flex-col items-center">
       <div class="w-full max-w-2xl flex flex-col min-h-screen relative">
         <!-- Encabezado -->
-        <header class="sticky top-0 bg-black z-10 border-b border-gray-800 p-4">
+        <header class="sticky top-0 bg-esmerald-50 dark:bg-neutral-950 z-10 border-b border-gray-800 p-4">
           <h1 class="text-xl font-bold text-white">Feed Global</h1>
         </header>
         <BaseLoader v-if="cargando" />
@@ -216,7 +211,7 @@ export default {
           </div>
           <!-- Modal para publicar -->
           <BaseModal v-if="mostrarModalPublicar" @close="mostrarModalPublicar = false">
-            <form action="#" @submit.prevent="enviarMensaje" class="flex flex-col gap-2 items-end p-4 bg-black border-b border-gray-800 shadow-sm rounded-b-xl">
+            <form action="#" @submit.prevent="enviarMensaje" class="flex flex-col gap-2 items-end p-4 border-b border-gray-800 shadow-sm rounded-b-xl">
               <textarea id="cuerpo"
                 class="w-full p-2 rounded-lg border border-emerald-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-800/20 outline-none min-h-[48px] max-h-32 bg-[#1a1a1a] text-white resize-none transition-all"
                 v-model="nuevoMensaje.cuerpo" :disabled="cargando"
@@ -233,7 +228,7 @@ export default {
             </form>
           </BaseModal>
           <!-- Feed de mensajes -->
-          <section class="flex-1 p-4 space-y-6" :style="{'background-color': '#000'}">
+          <section class="flex-1 p-4 space-y-6 ">
             <ul class="flex flex-col gap-6" aria-live="polite" aria-label="Publicaciones del feed">
               <MessageItem
                 v-for="mensaje in mensajes.slice(0, publicacionesVisibles)"
@@ -262,7 +257,7 @@ export default {
     </main>
 
     <!-- Sidebar derecho: Estático -->
-    <aside class="hidden lg:flex flex-col w-1/4 border-l border-gray-800 bg-black p-4 h-screen sticky top-0 space-y-8">
+    <aside class="hidden lg:flex flex-col w-1/4 border-l border-gray-800 bg-esmerald-50 dark:bg-neutral-950 p-4 h-screen sticky top-0 space-y-8">
       <!-- Otros widgets aquí si los hay -->
       <div>
         <h2 class="font-bold text-lg mb-2 text-white">Tendencias</h2>

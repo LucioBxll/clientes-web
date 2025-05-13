@@ -80,24 +80,18 @@ export default {
 </script>
 
 <template>
-    <div class="flex flex-col h-full" :style="{'background-color': 'var(--color-background)', 'color': 'var(--color-text)'}">
+    <div class="flex flex-col h-full bg-emerald-50 dark:bg-neutral-950" >
         <header role="banner">
             <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
         </header>
         <main role="main" class="flex-grow container mx-auto">
             <RouterView />
         </main>
-        <Footer v-if="$route.path !== '/' && $route.path !== '/novedades'" />
+        <Footer v-if="$route.path !== '/'" />
     </div>
 </template>
 
 <style>
-/* Asegurarse de que las transiciones sean suaves */
-.transition-colors {
-    transition-property: background-color, border-color, color, fill, stroke;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 200ms;
-}
 
 html, body {
     height: 100%;

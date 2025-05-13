@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200" :style="{'background-color': 'var(--color-primary)'}" dark:bg-gray-900>
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200 bg-emerald-50 dark:bg-neutral-950">
     <div class="max-w-4xl mx-auto">
       <BaseLoader v-if="cargando || !usuario" />
       <template v-else>

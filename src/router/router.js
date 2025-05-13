@@ -1,28 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { getCurrentUser } from '../services/auth';
-// import Home from '../pages/Home.vue';
 
 // Definimos la lista de rutas de nuestra aplicación.
 const routes = [
-    { path: '/', component: () => import('../pages/GlobalChat.vue') },
-    { 
-        path: '/chat-global',     
-        component: () => import('../pages/GlobalChat.vue'),
-        meta: { requiresAuth: true }
-    },
-    { path: '/ingresar',        component: () => import('../pages/Login.vue'), },
-    { path: '/registro',        component: () => import('../pages/Register.vue'), },
-    { 
-        path: '/perfil',        
-        component: () => import('../pages/Profile.vue'),
-        meta: { requiresAuth: true }
-    },
-    { path: '/perfil/:id', component: () => import('../pages/ProfileFeed.vue') },
-    { path: '/terminos',        component: () => import('../pages/Terms.vue'), },
-    { path: '/privacidad',      component: () => import('../pages/Privacy.vue'), },
-    { path: '/calendario',      component: () => import('../pages/Calendar.vue'), },
-    { path: '/blog', component: () => import('../pages/Blog.vue'), },
-    { path: '/novedades', component: () => import('../pages/Home.vue') },
+    { path: '/',            component: () => import('../pages/GlobalChat.vue') },
+    { path: '/chat-global', component: () => import('../pages/GlobalChat.vue'), meta: { requiresAuth: true }},
+    { path: '/ingresar',    component: () => import('../pages/Login.vue'), },
+    { path: '/registro',    component: () => import('../pages/Register.vue'), },
+    { path: '/perfil',      component: () => import('../pages/Profile.vue'), meta: { requiresAuth: true }},
+    { path: '/perfil/:id',  component: () => import('../pages/ProfileFeed.vue') },
+    { path: '/terminos',    component: () => import('../pages/Terms.vue'), },
+    { path: '/privacidad',  component: () => import('../pages/Privacy.vue'), },
 ];
 
 // Creamos el router con createRouter.
