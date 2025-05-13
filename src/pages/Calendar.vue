@@ -1,18 +1,18 @@
 <template>
-  <div class="min-h-screen bg-blue-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200" :style="{'background-color': 'var(--color-primary)'}" dark:bg-gray-900>
     <div class="max-w-3xl mx-auto">
       <BaseLoader v-if="cargando" />
       <template v-else>
         <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
         <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
-        <h1 class="text-3xl font-bold text-center mb-8 text-primary-600 dark:text-primary-400">Calendario</h1>
+        <h1 class="text-3xl font-bold text-center mb-8 text-emerald-600 dark:text-emerald-400">Calendario</h1>
         
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-200">
           <!-- Controles del calendario -->
           <div class="flex items-center justify-between mb-6">
             <button 
               @click="mesAnterior" 
-              class="p-2 rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-gray-700 transition-colors"
+              class="p-2 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-colors"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -23,7 +23,7 @@
             </h2>
             <button 
               @click="mesSiguiente" 
-              class="p-2 rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-gray-700 transition-colors"
+              class="p-2 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-colors"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -50,16 +50,16 @@
               :class="[
                 'p-2 text-center rounded-lg transition-colors cursor-pointer',
                 dia.esMesActual 
-                  ? 'text-gray-700 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700' 
+                  ? 'text-gray-700 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700' 
                   : 'text-gray-400 dark:text-gray-500',
-                dia.esHoy ? 'bg-primary-100 dark:bg-gray-700 font-bold' : '',
-                dia.esSeleccionado ? 'bg-primary-200 dark:bg-gray-600' : '',
-                tieneEventos(dia.fecha) ? 'ring-2 ring-primary-500 dark:ring-primary-400' : ''
+                dia.esHoy ? 'bg-emerald-100 dark:bg-gray-700 font-bold' : '',
+                dia.esSeleccionado ? 'bg-emerald-200 dark:bg-gray-600' : '',
+                tieneEventos(dia.fecha) ? 'ring-2 ring-emerald-500 dark:ring-emerald-400' : ''
               ]"
               @click="seleccionarFecha(dia)"
             >
               {{ dia.dia }}
-              <div v-if="tieneEventos(dia.fecha)" class="w-1 h-1 mx-auto mt-1 rounded-full bg-primary-500 dark:bg-primary-400"></div>
+              <div v-if="tieneEventos(dia.fecha)" class="w-1 h-1 mx-auto mt-1 rounded-full bg-emerald-500 dark:bg-emerald-400"></div>
             </div>
           </div>
 
@@ -71,7 +71,7 @@
               </h3>
               <button 
                 @click="mostrarFormularioEvento = true"
-                class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 transition-colors"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors"
               >
                 Agregar Evento
               </button>
@@ -103,7 +103,7 @@
               v-model="nuevoEvento.titulo"
               type="text" 
               required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
             >
           </div>
           
@@ -113,7 +113,7 @@
               v-model="nuevoEvento.hora"
               type="time" 
               required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
             >
           </div>
           
@@ -122,7 +122,7 @@
             <textarea 
               v-model="nuevoEvento.descripcion"
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
             ></textarea>
           </div>
         </div>
@@ -137,7 +137,7 @@
           </button>
           <button 
             type="submit"
-            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 transition-colors"
+            class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors"
           >
             Guardar Evento
           </button>

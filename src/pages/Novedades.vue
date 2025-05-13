@@ -68,12 +68,12 @@ export default {
 </script>
 
 <template>
-  <div class="w-full bg-blue-50 dark:bg-gray-900 min-h-screen py-8">
+  <div class="w-full min-h-screen py-8" :style="{'background-color': 'var(--color-primary)'}" dark:bg-gray-900>
     <div class="max-w-4xl mx-auto px-4">
       <h1 class="text-3xl font-bold mb-8 text-gray-900 dark:text-white text-center">Novedades</h1>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div v-for="novedad in novedades" :key="novedad.id"
-          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:bg-blue-100 dark:hover:bg-gray-700 transition-all duration-200">
+          class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200">
           <div class="flex justify-between items-start mb-4">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ novedad.titulo }}</h2>
             <button @click="alternarDetallesNovedad(novedad)" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
@@ -95,8 +95,8 @@ export default {
               <div v-else class="space-y-3">
                 <div v-for="comentario in novedad.comentarios" :key="comentario.id" class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                   <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                      <span class="text-sm font-medium text-primary-600 dark:text-primary-400">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
+                      <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                         {{ comentario.autor.charAt(0) }}
                       </span>
                     </div>

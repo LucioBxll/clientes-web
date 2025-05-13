@@ -5,6 +5,7 @@ import { getCurrentUser } from '../services/auth';
 import BaseAlert from '../components/BaseAlert.vue';
 import BaseSuccess from '../components/BaseSuccess.vue';
 import Footer from '../components/Footer.vue';
+import BlogCard from '../components/BlogCard.vue';
 
 export default {
     name: 'Inicio',
@@ -16,7 +17,8 @@ export default {
         BookOpenIcon,
         BaseAlert,
         BaseSuccess,
-        Footer
+        Footer,
+        BlogCard
     },
     data() {
         return {
@@ -116,7 +118,8 @@ export default {
                     icono: BookOpenIcon,
                     ruta: '/recursos'
                 }
-            ]
+            ],
+            publicaciones: []
         }
     },
     methods: {
@@ -162,16 +165,23 @@ export default {
             
             this.mensajeSuccess = 'Evento guardado en el calendario.';
             setTimeout(() => { this.mensajeSuccess = ''; }, 4000);
+        },
+        cargarPublicaciones() {
+            const guardadas = localStorage.getItem('blogPublicaciones');
+            if (guardadas) {
+                this.publicaciones = JSON.parse(guardadas);
+            }
         }
     },
     async mounted() {
         this.usuario = await getCurrentUser();
+        this.cargarPublicaciones();
     }
 }
 </script>
 
 <template>
-    <div class="w-full bg-blue-50 dark:bg-gray-900 flex min-h-screen">
+    <div class="w-full flex min-h-screen" :style="{'background-color': 'var(--color-primary)'}" dark:bg-gray-900>
         <!-- Contenido principal -->
         <div class="flex-1">
             <div class="container mx-auto">
@@ -179,7 +189,7 @@ export default {
                 <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
                 <!-- Hero Section -->
                 <div class="px-4 sm:px-6 lg:px-8 py-8">
-                    <section class="text-center py-12 px-4 mb-12 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 text-white rounded-lg">
+                    <section class="text-center py-12 px-4 mb-12 text-white rounded-lg" :style="{'background': 'linear-gradient(to right, var(--color-accent), #059669)'}">
                         <MainH1 class="text-4xl font-bold mb-4">¡Les damos la bienvenida a DV Social!</MainH1>
                         <p class="text-xl max-w-2xl mx-auto">
                             DV Social es la mejor red para enterarte de todo lo que sucede en la Escuela, conectar con otras
@@ -187,12 +197,21 @@ export default {
                         </p>
                     </section>
 
-                    <!-- Featured Posts Section -->
+                    <!-- Aquí iría el feed de publicaciones, puedes replicar la lógica de Blog.vue si lo deseas -->
+                    <!-- Ejemplo de uso de BlogCard para cada publicación -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Publicaciones</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <BlogCard v-for="publicacion in publicaciones" :key="publicacion.id" :publicacion="publicacion" :usuario="usuario" />
+                        </div>
+                    </section>
+
+                    <!-- Secciones originales conservadas -->
                     <section class="mb-12">
                         <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Novedades Destacadas</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div v-for="post in novedadesDestacadas" :key="post.id"
-                                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:bg-blue-100 dark:hover:bg-gray-700 transition-all duration-200">
+                                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200">
                                 <div class="flex justify-between items-start mb-4">
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ post.titulo }}</h3>
                                     <button 
@@ -228,7 +247,7 @@ export default {
                                             <div v-for="comment in post.comentarios" :key="comment.id" 
                                                 class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                                                 <div class="flex items-start space-x-3">
-                                                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                                                    <div class="w-8 h-8 rounded-full flex items-center justify-center" :style="{'background-color': 'var(--color-secondary)'}" dark:bg-primary-900>
                                                         <span class="text-sm font-medium text-primary-600 dark:text-primary-400">
                                                             {{ comment.autor.charAt(0) }}
                                                         </span>
@@ -252,8 +271,8 @@ export default {
                                         ></textarea>
                                         <button
                                             @click="agregarComentario(post)"
-                                            class="mt-2 px-3 py-1 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
-                                        >
+                                            class="mt-2 px-3 py-1 text-sm rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                                            :style="{'background-color': 'var(--color-accent)', color: 'white'}">
                                             Comentar
                                         </button>
                                     </div>
@@ -261,8 +280,8 @@ export default {
                                     <!-- Botón para guardar como fecha importante -->
                                     <button
                                         @click="guardarComoFechaImportante(post)"
-                                        class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                                    >
+                                        class="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-800 transition-colors"
+                                        :style="{'background-color': 'var(--color-secondary)', color: 'var(--color-text)'}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
@@ -278,10 +297,10 @@ export default {
                         <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">Próximos Eventos</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div v-for="event in proximosEventos" :key="event.id"
-                                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:bg-blue-100 dark:hover:bg-gray-700 transition-all duration-200">
+                                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200">
                                 <div class="flex items-center space-x-4">
-                                    <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none"
+                                    <div class="bg-emerald-100 dark:bg-emerald-900 p-3 rounded-full">
+                                        <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300" fill="none"
                                             stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -302,9 +321,9 @@ export default {
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <router-link v-for="(item, index) in accesosRapidos" :key="index"
                                 :to="item.ruta"
-                                class="p-6 bg-white dark:bg-gray-800 rounded-lg text-center hover:bg-blue-100 dark:hover:bg-gray-700 transition-all duration-200 group">
+                                class="p-6 bg-white dark:bg-gray-800 rounded-lg text-center hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200 group">
                                 <component :is="item.icono"
-                                    class="w-12 h-12 mx-auto mb-3 text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300" />
+                                    class="w-12 h-12 mx-auto mb-3 text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300" />
                                 <span class="block text-gray-900 dark:text-white font-medium">{{ item.nombre }}</span>
                             </router-link>
                         </div>
@@ -319,6 +338,12 @@ export default {
                 <Footer />
             </div>
         </aside>
+        <!-- Botón flotante para nueva publicación -->
+        <router-link to="/blog" class="fixed bottom-8 right-8 z-50">
+            <button class="bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl focus:outline-none" :style="{'background-color': 'var(--color-accent)'}">
+                +
+            </button>
+        </router-link>
     </div>
 </template>
 

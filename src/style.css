@@ -3,11 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #e3f2fd;      /* Azul muy claro */
-  --color-secondary: #bbdefb;    /* Azul claro */
-  --color-accent: #64b5f6;       /* Azul medio para acentos */
-  --color-text: #2c3e50;         /* Texto oscuro pero suave */
-  --color-background: #ffffff;    /* Fondo blanco */
+  --color-primary: #ecfdf5;      /* Verde muy claro (emerald-50) para modo claro */
+  --color-secondary: #34d399;    /* Verde (emerald-400) */
+  --color-accent: #10b981;       /* Verde acento (emerald-500) */
+  --color-text: #111827;         /* Texto negro */
+  --color-background: #ecfdf5;   /* Fondo claro */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #000000;    /* Fondo negro modo oscuro */
+    --color-secondary: #34d399;  /* Verde (emerald-400) */
+    --color-accent: #10b981;     /* Verde acento (emerald-500) */
+    --color-text: #ffffff;       /* Texto blanco */
+    --color-background: #000000; /* Fondo negro */
+  }
 }
 
 /* Clases base */
@@ -84,5 +94,45 @@ html, body, #app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.font-lovelo {
+  font-family: 'Lovelo', sans-serif;
+}
+
+@font-face {
+  font-family: 'Lovelo Black';
+  src: url('/fonts/Lovelo-Black.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lovelo Line Bold';
+  src: url('/fonts/Lovelo-LineBold.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lovelo Line Light';
+  src: url('/fonts/Lovelo-LineLight.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-lovelo-black {
+  font-family: 'Lovelo Black', sans-serif;
+  font-weight: bold;
+}
+
+.font-lovelo-line-bold {
+  font-family: 'Lovelo Line Bold', sans-serif;
+  font-weight: normal;
+}
+
+.font-lovelo-line-light {
+  font-family: 'Lovelo Line Light', sans-serif;
+  font-weight: 300;
 }
 

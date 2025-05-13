@@ -1,5 +1,5 @@
 <template>
-  <div class="p-3 rounded-lg bg-primary-50 dark:bg-gray-700 border border-primary-200 dark:border-gray-600">
+  <div class="p-3 rounded-lg bg-emerald-50 dark:bg-gray-700 border border-emerald-200 dark:border-gray-600">
     <div class="flex items-center justify-between">
       <span class="font-medium text-gray-700 dark:text-gray-300">{{ evento.titulo }}</span>
       <div class="flex items-center space-x-2">

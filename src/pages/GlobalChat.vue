@@ -37,7 +37,8 @@ export default {
             usuarioActual: null,
             cargando: false,
             publicacionesVisibles: 10, // cantidad de publicaciones a mostrar
-            usuariosSugeridos: [] // usuarios para 'A quién seguir'
+            usuariosSugeridos: [], // usuarios para 'A quién seguir'
+            mostrarModalPublicar: false
         }
     },
     // La propiedad "methods" permite definir las funciones que queremos que el componente tenga.
@@ -161,23 +162,23 @@ export default {
 </script>
 
 <template>
-  <div class="min-h-screen bg-blue-50 dark:bg-gray-900 flex">
+  <div class="min-h-screen flex" :style="{'background-color': 'var(--color-background)', 'color': 'var(--color-text)'}">
     <!-- Sidebar izquierdo: Estático -->
-    <aside class="hidden md:flex flex-col w-1/5 border-r border-gray-200 dark:border-gray-800 p-4 h-screen sticky top-0">
+    <aside class="hidden md:flex flex-col w-1/5 border-r border-gray-800 bg-black p-4 h-screen sticky top-0">
       <nav class="flex flex-col gap-4">
-        <router-link to="/" class="flex items-center gap-2 font-semibold text-lg hover:text-blue-600 dark:hover:text-blue-400">
+        <router-link to="/" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>🏠</span> Inicio
         </router-link>
-        <router-link to="/chat-global" class="flex items-center gap-2 font-semibold text-lg hover:text-blue-600 dark:hover:text-blue-400">
+        <router-link to="/chat-global" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>💬</span> Chat Global
         </router-link>
-        <router-link to="/blog" class="flex items-center gap-2 font-semibold text-lg hover:text-blue-600 dark:hover:text-blue-400">
+        <router-link to="/blog" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>📝</span> Blog
         </router-link>
-        <router-link to="/calendario" class="flex items-center gap-2 font-semibold text-lg hover:text-blue-600 dark:hover:text-blue-400">
+        <router-link to="/calendario" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>📅</span> Calendario
         </router-link>
-        <router-link to="/perfil" class="flex items-center gap-2 font-semibold text-lg hover:text-blue-600 dark:hover:text-blue-400">
+        <router-link to="/perfil" class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-white">
           <span>👤</span> Perfil
         </router-link>
       </nav>
@@ -187,33 +188,52 @@ export default {
     <main class="flex-1 flex flex-col items-center">
       <div class="w-full max-w-2xl flex flex-col min-h-screen relative">
         <!-- Encabezado -->
-        <header class="sticky top-0 bg-white dark:bg-gray-900 z-10 border-b border-gray-200 dark:border-gray-800 p-4">
-          <h1 class="text-xl font-bold text-gray-900 dark:text-white">Feed Global</h1>
+        <header class="sticky top-0 bg-black z-10 border-b border-gray-800 p-4">
+          <h1 class="text-xl font-bold text-white">Feed Global</h1>
         </header>
         <BaseLoader v-if="cargando" />
         <template v-else>
           <!-- Mensaje de error -->
           <BaseAlert v-if="mensajeError" type="error" class="mb-2">{{ mensajeError }}</BaseAlert>
-          <div v-if="!usuarioActual" class="p-4 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-b-xl border-b border-yellow-300 dark:border-yellow-700 mb-4 text-center font-medium">
+          <div v-if="!usuarioActual" class="p-4 bg-yellow-900 text-yellow-200 rounded-b-xl border-b border-yellow-700 mb-4 text-center font-medium">
             Debes iniciar sesión para publicar en el feed.
           </div>
-          <form v-if="usuarioActual" action="#" @submit.prevent="enviarMensaje" class="flex flex-col gap-2 items-end p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm rounded-b-xl">
-            <textarea id="cuerpo"
-              class="w-full p-2 rounded-lg border border-primary-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-500/20 outline-none min-h-[48px] max-h-32 bg-blue-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 resize-none transition-all"
-              v-model="nuevoMensaje.cuerpo" :disabled="cargando"
-              placeholder="¿Qué quieres compartir?" aria-required="true"></textarea>
-            <input type="file" accept="image/*" @change="handleImagenSeleccionada" :disabled="cargando" class="block w-full text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-            <div v-if="nuevoMensaje.preview" class="w-full flex justify-start mb-2">
-              <img :src="nuevoMensaje.preview" alt="Preview imagen" class="max-h-40 rounded-lg border border-gray-300 dark:border-gray-600" />
-            </div>
-            <button type="submit"
-              class="bg-blue-600 hover:bg-blue-500 focus:bg-blue-500 active:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="(!nuevoMensaje.cuerpo.trim() && !nuevoMensaje.imagen) || cargando">
-              {{ cargando ? 'Publicando...' : 'Publicar' }}
+          <!-- Botón flotante para abrir el modal de publicación con tooltip -->
+          <div class="group fixed bottom-8 right-8 z-50 flex flex-col items-center">
+            <button
+              v-if="usuarioActual"
+              @click="mostrarModalPublicar = true"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl focus:outline-none relative"
+            >
+              +
             </button>
-          </form>
+            <span
+              v-if="usuarioActual"
+              class="opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded py-1 px-3 mt-2 pointer-events-none select-none shadow-lg"
+            >
+              Publicar
+            </span>
+          </div>
+          <!-- Modal para publicar -->
+          <BaseModal v-if="mostrarModalPublicar" @close="mostrarModalPublicar = false">
+            <form action="#" @submit.prevent="enviarMensaje" class="flex flex-col gap-2 items-end p-4 bg-black border-b border-gray-800 shadow-sm rounded-b-xl">
+              <textarea id="cuerpo"
+                class="w-full p-2 rounded-lg border border-emerald-800 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-800/20 outline-none min-h-[48px] max-h-32 bg-[#1a1a1a] text-white resize-none transition-all"
+                v-model="nuevoMensaje.cuerpo" :disabled="cargando"
+                placeholder="¿Qué quieres compartir?" aria-required="true"></textarea>
+              <input type="file" accept="image/*" @change="handleImagenSeleccionada" :disabled="cargando" class="block w-full text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#1a1a1a] file:text-emerald-400 hover:file:bg-emerald-900" />
+              <div v-if="nuevoMensaje.preview" class="w-full flex justify-start mb-2">
+                <img :src="nuevoMensaje.preview" alt="Preview imagen" class="max-h-40 rounded-lg border border-gray-700" />
+              </div>
+              <button type="submit"
+                class="bg-emerald-600 hover:bg-emerald-500 focus:bg-emerald-500 active:bg-emerald-700 text-white font-semibold py-2 px-6 rounded-lg transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="(!nuevoMensaje.cuerpo.trim() && !nuevoMensaje.imagen) || cargando">
+                {{ cargando ? 'Publicando...' : 'Publicar' }}
+              </button>
+            </form>
+          </BaseModal>
           <!-- Feed de mensajes -->
-          <section class="flex-1 p-4 space-y-6 bg-blue-50 dark:bg-gray-900">
+          <section class="flex-1 p-4 space-y-6" :style="{'background-color': '#000'}">
             <ul class="flex flex-col gap-6" aria-live="polite" aria-label="Publicaciones del feed">
               <MessageItem
                 v-for="mensaje in mensajes.slice(0, publicacionesVisibles)"
@@ -226,13 +246,13 @@ export default {
                     :src="cacheUsuarios[mensaje.user_id]?.avatar_url"
                     :alt="'Avatar de ' + (cacheUsuarios[mensaje.user_id]?.username || cacheUsuarios[mensaje.user_id]?.email)"
                     :fallback-initial="cacheUsuarios[mensaje.user_id]?.username?.charAt(0)?.toUpperCase() || cacheUsuarios[mensaje.user_id]?.email?.charAt(0)?.toUpperCase() || '?'"
-                    img-class="h-10 w-10 rounded-full object-cover border-2 border-blue-400"
+                    img-class="h-10 w-10 rounded-full object-cover border-2 border-emerald-400"
                   />
                 </template>
               </MessageItem>
             </ul>
             <div v-if="mensajes.length > publicacionesVisibles" class="flex justify-center mt-4">
-              <button @click="publicacionesVisibles += 10" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow transition-all">
+              <button @click="publicacionesVisibles += 10" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow transition-all">
                 Ver más
               </button>
             </div>
@@ -242,34 +262,34 @@ export default {
     </main>
 
     <!-- Sidebar derecho: Estático -->
-    <aside class="hidden lg:flex flex-col w-1/4 border-l border-gray-200 dark:border-gray-800 p-4 h-screen sticky top-0 space-y-8">
+    <aside class="hidden lg:flex flex-col w-1/4 border-l border-gray-800 bg-black p-4 h-screen sticky top-0 space-y-8">
       <!-- Otros widgets aquí si los hay -->
       <div>
-        <h2 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Tendencias</h2>
-        <ul class="text-gray-700 dark:text-gray-300 text-sm space-y-1">
+        <h2 class="font-bold text-lg mb-2 text-white">Tendencias</h2>
+        <ul class="text-gray-300 text-sm space-y-1">
           <li>#Ejemplo1</li>
           <li>#Ejemplo2</li>
           <li>#Ejemplo3</li>
         </ul>
       </div>
       <div>
-        <h2 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">A quién seguir</h2>
-        <ul class="text-gray-700 dark:text-gray-300 text-sm space-y-1">
+        <h2 class="font-bold text-lg mb-2 text-white">A quién seguir</h2>
+        <ul class="text-gray-300 text-sm space-y-1">
           <li v-for="usuario in usuariosSugeridos" :key="usuario.id" class="flex items-center gap-2 mb-2">
             <Avatar
               :src="usuario.avatar_url"
               :alt="'Avatar de ' + (usuario.username || usuario.email)"
               :fallback-initial="usuario.username?.charAt(0)?.toUpperCase() || usuario.email?.charAt(0)?.toUpperCase() || '?'"
-              img-class="h-8 w-8 rounded-full object-cover border-2 border-blue-400"
+              img-class="h-8 w-8 rounded-full object-cover border-2 border-emerald-400"
             />
-            <router-link :to="'/perfil/' + usuario.id" class="font-semibold hover:underline text-primary-700 dark:text-primary-400">
+            <router-link :to="'/perfil/' + usuario.id" class="font-semibold hover:underline text-emerald-400">
               {{ usuario.username || usuario.email }}
             </router-link>
-            <span class="text-xs text-gray-500 dark:text-gray-400">@{{ usuario.username || usuario.email?.split('@')[0] }}</span>
+            <span class="text-xs text-gray-500">@{{ usuario.username || usuario.email?.split('@')[0] }}</span>
           </li>
         </ul>
       </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <div class="bg-[#1a1a1a] rounded-lg shadow p-4">
         <Footer />
       </div>
     </aside>

@@ -80,14 +80,14 @@ export default {
 </script>
 
 <template>
-    <div class="flex flex-col h-full bg-blue-50 dark:bg-gray-900 transition-colors duration-200">
+    <div class="flex flex-col h-full" :style="{'background-color': 'var(--color-background)', 'color': 'var(--color-text)'}">
         <header role="banner">
             <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
         </header>
         <main role="main" class="flex-grow container mx-auto">
             <RouterView />
         </main>
-        <Footer />
+        <Footer v-if="$route.path !== '/' && $route.path !== '/novedades'" />
     </div>
 </template>
 
@@ -111,3 +111,7 @@ html, body {
     flex-direction: column;
 }
 </style>
+
+
+
+

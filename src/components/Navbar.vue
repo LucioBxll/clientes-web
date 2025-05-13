@@ -8,7 +8,7 @@ export default {
   name: 'BarraNavegacion',
   components: { Avatar },
   props: {
-    esOscuro: {
+    isDark: {
       type: Boolean,
       required: true
     }
@@ -93,12 +93,13 @@ export default {
 </script>
 
 <template>
-  <nav class="bg-primary-50 dark:bg-gray-800 shadow-sm border-b border-primary-100 dark:border-gray-700 transition-colors duration-200">
+  <nav class="bg-primary-50 dark:bg-gray-800 shadow-sm border-b border-primary-100 dark:border-gray-700 transition-colors duration-200" :style="{'background-color': 'var(--color-primary)'}">
     <div class="max-w-7xl mx-auto px-4">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
-          <router-link to="/" class="text-xl font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
-            DV Social
+          <router-link to="/" class="flex items-center">
+            <img src="../public/logo.svg" alt="Logo" class="h-8 w-8 mr-2" />
+            <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors font-lovelo-line-bold">minima</span>
           </router-link>
         </div>
 
@@ -109,26 +110,30 @@ export default {
             :key="index"
             :to="enlace.ruta"
             :class="[
-              'px-3 py-2 rounded-lg transition-all duration-200',
-              'text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700',
-              ruta.path === enlace.ruta ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
+              'px-3 py-2 relative transition-all duration-200 font-medium',
+              isDark ? 'text-white' : 'text-emerald-600',
+              'group',
             ]"
           >
-            {{ enlace.nombre }}
+            <span>{{ enlace.nombre }}</span>
+            <span
+              class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"
+              :class="ruta.path === enlace.ruta ? 'scale-x-100' : ''"
+            ></span>
           </router-link>
           
           <!-- Menú de perfil -->
           <div class="relative" v-if="usuario.id" ref="refMenuPerfil">
             <button
               @click="alternarMenuPerfil"
-              class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
             >
               <span class="sr-only">Abrir menú de usuario</span>
               <Avatar
                 :src="usuario.avatar_url"
                 :alt="'Avatar de ' + (usuario.username || usuario.email)"
                 :fallback-initial="usuario.username?.charAt(0)?.toUpperCase() || usuario.email?.charAt(0)?.toUpperCase() || '?'"
-                img-class="h-8 w-8 rounded-full object-cover border-2 border-blue-400"
+                img-class="h-8 w-8 rounded-full object-cover border-2 border-emerald-400"
               />
             </button>
             <!-- Menú desplegable -->
@@ -159,10 +164,10 @@ export default {
           <!-- Botón de tema -->
           <button
             @click="$emit('toggle-dark')"
-            class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200"
-            :title="esOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+            class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200"
+            :title="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
           >
-            <span v-if="esOscuro" class="text-lg">🌞</span>
+            <span v-if="isDark" class="text-lg">🌞</span>
             <span v-else class="text-lg">🌙</span>
           </button>
         </div>
@@ -172,7 +177,7 @@ export default {
 
           <button
             @click="alternarMenu"
-            class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200"
+            class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200"
           >
             <svg
               class="h-6 w-6"
@@ -206,13 +211,13 @@ export default {
         <!-- Fondo oscuro -->
         <div class="fixed inset-0 bg-black bg-opacity-40" @click="alternarMenu"></div>
         <!-- Panel lateral -->
-        <div class="ml-auto w-72 max-w-full h-full bg-primary-50 dark:bg-gray-800 shadow-lg flex flex-col relative animate-slide-in-right">
+        <div class="ml-auto w-72 max-w-full h-full bg-primary-50 dark:bg-gray-800 shadow-lg flex flex-col relative animate-slide-in-right" :style="{'background-color': 'var(--color-primary)'}">
           <!-- Logo -->
           <div class="flex items-center justify-between px-4 py-4 border-b border-primary-100 dark:border-gray-700">
-            <router-link to="/" class="text-xl font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
-              DV Social
+            <router-link to="/" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors font-lovelo-line-bold">
+              minima
             </router-link>
-            <button @click="alternarMenu" class="text-2xl text-secondary-600 dark:text-gray-300 focus:outline-none ml-2">&times;</button>
+            <button @click="alternarMenu" class="text-2xl text-emerald-600 dark:text-gray-300 focus:outline-none ml-2">&times;</button>
           </div>
           <!-- Foto y perfil -->
           <div v-if="usuario.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-primary-100 dark:border-gray-700">
@@ -220,11 +225,11 @@ export default {
               :src="usuario.avatar_url"
               :alt="'Avatar de ' + (usuario.username || usuario.email)"
               :fallback-initial="usuario.username?.charAt(0)?.toUpperCase() || usuario.email?.charAt(0)?.toUpperCase() || '?'"
-              img-class="h-12 w-12 rounded-full object-cover border-2 border-blue-400"
+              img-class="h-12 w-12 rounded-full object-cover border-2 border-emerald-400"
             />
             <router-link
               to="/perfil"
-              class="block text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
+              class="block text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
               @click="alternarMenu"
             >
               Mi Perfil
@@ -237,22 +242,26 @@ export default {
               :key="index"
               :to="enlace.ruta"
               :class="[
-                'block px-3 py-2 rounded-lg transition-all duration-200',
-                'text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700',
-                ruta.path === enlace.ruta ? 'bg-primary-100 dark:bg-gray-700 text-primary-600 dark:text-primary-400 font-bold' : ''
+                'block px-3 py-2 relative transition-all duration-200 font-medium',
+                isDark ? 'text-white' : 'text-emerald-600',
+                'group',
               ]"
               @click="alternarMenu"
             >
-              {{ enlace.nombre }}
+              <span>{{ enlace.nombre }}</span>
+              <span
+                class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"
+                :class="ruta.path === enlace.ruta ? 'scale-x-100' : ''"
+              ></span>
             </router-link>
           </div>
           <!-- Modo oscuro/claro -->
           <div class="px-4 py-4 border-b border-primary-100 dark:border-gray-700 flex items-center">
             <button
               @click="$emit('toggle-dark')"
-              class="p-2 rounded-lg text-secondary-600 dark:text-gray-300 hover:bg-primary-100 dark:hover:bg-gray-700 transition-all duration-200 w-full text-center"
+              class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200 w-full text-center"
             >
-              <span v-if="esOscuro">🌞 Modo claro</span>
+              <span v-if="isDark">🌞 Modo claro</span>
               <span v-else>🌙 Modo oscuro</span>
             </button>
           </div>
@@ -260,7 +269,7 @@ export default {
           <div v-if="usuario.id" class="px-4 py-4">
             <button
               @click="cerrarSesion"
-              class="block w-full text-left text-red-600 hover:bg-primary-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
+              class="block w-full text-left text-red-600 hover:bg-emerald-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
             >
               Cerrar sesión
             </button>
@@ -287,5 +296,9 @@ export default {
 }
 .animate-slide-in-right {
   animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.router-link-active span,
+.router-link-exact-active span {
+  font-weight: bold;
 }
 </style> 

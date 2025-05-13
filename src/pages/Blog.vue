@@ -1,16 +1,16 @@
 <template>
-  <div class="min-h-screen bg-blue-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200" :style="{'background-color': 'var(--color-primary)'}" dark:bg-gray-900>
     <div class="max-w-4xl mx-auto">
       <BaseLoader v-if="cargando || !usuario" />
       <template v-else>
         <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
         <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
         <div class="flex justify-between items-center mb-8">
-          <h1 class="text-3xl font-bold text-primary-600 dark:text-primary-400">Blog</h1>
+          <h1 class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">Blog</h1>
           <button 
             v-if="usuario"
             @click="mostrarCrearPublicacion = true"
-            class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 transition-colors"
+            class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors"
           >
             Nueva Publicación
           </button>
@@ -38,7 +38,7 @@
                   v-model="nuevaPublicacion.titulo"
                   type="text" 
                   required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
                 >
               </div>
 
@@ -48,7 +48,7 @@
                   v-model="nuevaPublicacion.contenido"
                   rows="6"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
                 ></textarea>
               </div>
 
@@ -58,7 +58,7 @@
                   v-model="nuevaPublicacion.imagen"
                   type="url" 
                   placeholder="https://ejemplo.com/imagen.jpg"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
                 >
               </div>
 
@@ -72,7 +72,7 @@
                 </button>
                 <button 
                   type="submit"
-                  class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 transition-colors"
+                  class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors"
                 >
                   Publicar
                 </button>
@@ -103,7 +103,7 @@
                   v-model="publicacionEditando.titulo"
                   type="text" 
                   required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
                 >
               </div>
 
@@ -113,7 +113,7 @@
                   v-model="publicacionEditando.contenido"
                   rows="6"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
                 ></textarea>
               </div>
 
@@ -123,7 +123,7 @@
                   v-model="publicacionEditando.imagen"
                   type="url" 
                   placeholder="https://ejemplo.com/imagen.jpg"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
                 >
               </div>
 
@@ -137,7 +137,7 @@
                 </button>
                 <button 
                   type="submit"
-                  class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 transition-colors"
+                  class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors"
                 >
                   Guardar Cambios
                 </button>
@@ -149,7 +149,7 @@
         <!-- Lista de publicaciones -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div v-for="publicacion in publicaciones" :key="publicacion.id"
-            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 hover:bg-blue-100 dark:hover:bg-gray-700 transition-all duration-200">
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200">
             <div class="flex justify-between items-start mb-4">
               <div>
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ publicacion.titulo }}</h2>
@@ -161,7 +161,7 @@
                 <button 
                   v-if="usuario && usuario.id === publicacion.idUsuario"
                   @click="editarPublicacion(publicacion)"
-                  class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                  class="text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -195,7 +195,7 @@
               <button 
                 v-if="publicacion.contenido.length > 150"
                 @click="publicacion.mostrarContenidoCompleto = !publicacion.mostrarContenidoCompleto"
-                class="mt-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                class="mt-2 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
               >
                 {{ publicacion.mostrarContenidoCompleto ? 'Ver menos' : 'Ver más' }}
               </button>
@@ -208,8 +208,8 @@
                 <div v-for="comentario in publicacion.comentarios" :key="comentario.id" 
                   class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                   <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                      <span class="text-sm font-medium text-primary-600 dark:text-primary-400">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
+                      <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                         {{ comentario.autor.charAt(0) }}
                       </span>
                     </div>
@@ -226,12 +226,12 @@
                 <textarea
                   v-model="publicacion.nuevoComentario"
                   placeholder="Escribe un comentario..."
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-300"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-gray-300"
                   rows="2"
                 ></textarea>
                 <button
                   @click="agregarComentario(publicacion)"
-                  class="mt-2 px-3 py-1 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
+                  class="mt-2 px-3 py-1 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
                 >
                   Comentar
                 </button>

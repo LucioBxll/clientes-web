@@ -1,23 +1,23 @@
 <template>
-  <li class="flex items-start gap-3 p-3 rounded-lg bg-primary-50 dark:bg-gray-700 hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors">
+  <li class="flex items-start gap-3 p-3 rounded-lg bg-[#181c1f] dark:bg-[#181c1f] hover:bg-[#232a2e] transition-colors">
     <slot name="avatar" />
     <article class="flex-1">
-      <header class="font-semibold text-primary-700 dark:text-primary-400">
+      <header class="font-semibold text-emerald-400">
         <router-link
           :to="'/perfil/' + mensaje.user_id"
           :title="mensaje.username ? mensaje.username + ' ( @' + (mensaje.username || mensaje.email?.split('@')[0]) + ' )' : mensaje.email"
-          class="cursor-pointer hover:underline"
+          class="cursor-pointer hover:underline text-emerald-400"
         >
           {{ mensaje.username }}
         </router-link>
       </header>
-      <p class="text-secondary-600 dark:text-gray-300 break-words">{{ mensaje.body }}</p>
-      <img v-if="mensaje.image_url" :src="mensaje.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-200 dark:border-gray-600" />
+      <p class="text-white break-words">{{ mensaje.body }}</p>
+      <img v-if="mensaje.image_url" :src="mensaje.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-700" />
       <footer class="flex items-center gap-4 mt-2">
-        <time class="text-xs md:text-sm text-secondary-400 dark:text-gray-500" :datetime="mensaje.created_at">
+        <time class="text-xs md:text-sm text-gray-400" :datetime="mensaje.created_at">
           {{ new Date(mensaje.created_at).toLocaleString() }}
         </time>
-        <button @click="toggleComments" class="ml-auto text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+        <button @click="toggleComments" class="ml-auto text-xs text-emerald-400 hover:text-emerald-300 hover:underline font-semibold">
           {{ showComments ? 'Ocultar comentarios' : 'Comentar' }}
         </button>
       </footer>
@@ -25,17 +25,17 @@
         <div v-if="cargandoComentarios" class="text-xs text-gray-500">Cargando comentarios...</div>
         <ul v-else class="space-y-2 mb-2">
           <li v-for="comentario in comentarios" :key="comentario.id" class="flex items-start gap-2">
-            <Avatar :src="comentario.avatar_url" :alt="'Avatar de ' + comentario.username" :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" img-class="h-7 w-7 rounded-full object-cover border border-blue-300" />
+            <Avatar :src="comentario.avatar_url" :alt="'Avatar de ' + comentario.username" :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" img-class="h-7 w-7 rounded-full object-cover border border-emerald-400" />
             <div>
-              <span class="font-semibold text-xs text-primary-700 dark:text-primary-400">{{ comentario.username }}</span>
+              <span class="font-semibold text-xs text-emerald-400">{{ comentario.username }}</span>
               <span class="text-xs text-gray-400 ml-1">{{ new Date(comentario.created_at).toLocaleString() }}</span>
-              <div class="text-xs text-gray-700 dark:text-gray-200">{{ comentario.body }}</div>
+              <div class="text-xs text-white">{{ comentario.body }}</div>
             </div>
           </li>
         </ul>
         <form v-if="usuarioActual" @submit.prevent="enviarComentario" class="flex items-end gap-2 mt-2">
-          <input v-model="nuevoComentario" type="text" placeholder="Escribe un comentario..." class="flex-1 p-1 rounded border border-gray-300 dark:border-gray-600 text-xs bg-white dark:bg-gray-800" :disabled="enviandoComentario" />
-          <button type="submit" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded disabled:opacity-50" :disabled="enviandoComentario || !nuevoComentario.trim()">Comentar</button>
+          <input v-model="nuevoComentario" type="text" placeholder="Escribe un comentario..." class="flex-1 p-1 rounded border border-gray-700 text-xs bg-[#232a2e] text-white" :disabled="enviandoComentario" />
+          <button type="submit" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded disabled:opacity-50" :disabled="enviandoComentario || !nuevoComentario.trim()">Comentar</button>
         </form>
         <div v-if="errorComentario" class="text-xs text-red-500 mt-1">{{ errorComentario }}</div>
       </div>
