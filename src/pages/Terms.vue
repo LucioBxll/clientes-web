@@ -1,70 +1,68 @@
 <template>
-  <div class="min-h-screen bg-blue-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
-    <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 transition-colors duration-200">
-      <h1 class="text-3xl font-bold text-center mb-8 text-primary-600 dark:text-primary-400">TÉRMINOS Y CONDICIONES DE USO</h1>
+  <div class="min-h-screen bg-white dark:bg-neutral-950 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+    <div class="max-w-3xl mx-auto bg-white dark:bg-neutral-900 rounded-lg shadow-md p-8 transition-colors duration-200 border border-emerald-200 dark:border-gray-700">
+      <h1 class="text-3xl font-bold text-center mb-8 text-emerald-700 dark:text-emerald-400">TÉRMINOS Y CONDICIONES DE USO</h1>
       
-      <p class="text-gray-600 dark:text-gray-400 mb-8">Fecha de última actualización: [Fecha]</p>
+      <p class="text-emerald-600 dark:text-emerald-300 mb-8">Fecha de última actualización: 15 de Marzo de 2024</p>
 
       <div class="prose dark:prose-invert max-w-none">
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          Bienvenido/a a [Nombre de la App]. Al acceder y utilizar esta aplicación, aceptas cumplir con los siguientes términos y condiciones. Si no estás de acuerdo con ellos, por favor no utilices nuestros servicios.
+          Bienvenido/a a Minima. Al acceder y utilizar esta aplicación, aceptas cumplir con los siguientes términos y condiciones. Si no estás de acuerdo con ellos, por favor no utilices nuestros servicios.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">1. Aceptación de los términos</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">1. Aceptación de los términos</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          Al registrarte o utilizar [Nombre de la App], declaras que has leído, comprendido y aceptado estos Términos y Condiciones, así como nuestra Política de Privacidad.
+          Al registrarte o utilizar Minima, declaras que has leído, comprendido y aceptado estos Términos y Condiciones, así como nuestra Política de Privacidad.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">2. Descripción del servicio</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">2. Descripción del servicio</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          [Nombre de la App] es una red social que permite a los usuarios crear un perfil, compartir contenido, interactuar con otros usuarios y participar en comunidades virtuales.
+          Minima es una red social minimalista que permite a los usuarios crear un perfil, compartir contenido, interactuar con otros usuarios y participar en conversaciones globales a través de nuestro chat global.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">3. Registro de usuario</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">3. Registro de usuario</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          Para acceder a ciertas funciones, debes crear una cuenta proporcionando información veraz, actual y completa. Eres responsable de mantener la confidencialidad de tu contraseña y de todas las actividades que ocurran en tu cuenta.
+          Para acceder a todas las funciones de Minima, debes crear una cuenta proporcionando información veraz, actual y completa. Eres responsable de mantener la confidencialidad de tu contraseña y de todas las actividades que ocurran en tu cuenta.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">4. Contenido del usuario</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">4. Contenido del usuario</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          Eres el único responsable del contenido que publiques. No debes subir contenido que sea ilegal, ofensivo, amenazante, difamatorio, o que infrinja derechos de terceros.
-        </p>
-        <p class="mb-6 text-gray-700 dark:text-gray-300">
-          Nos reservamos el derecho de eliminar cualquier contenido que viole estas condiciones o que consideremos inapropiado.
+          Eres el único responsable del contenido que publiques en Minima. No debes subir contenido que sea ilegal, ofensivo, amenazante, difamatorio, o que infrinja derechos de terceros. Nos reservamos el derecho de eliminar cualquier contenido que viole estas condiciones.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">5. Normas de uso</h2>
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Al utilizar la app, te comprometes a:</p>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">5. Normas de uso</h2>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">Al utilizar Minima, te comprometes a:</p>
         <ul class="list-disc pl-6 mb-6 text-gray-700 dark:text-gray-300">
           <li>No suplantar a otras personas o entidades.</li>
           <li>No acosar, amenazar ni intimidar a otros usuarios.</li>
-          <li>No utilizar la app con fines comerciales sin autorización.</li>
+          <li>No utilizar la plataforma con fines comerciales sin autorización.</li>
           <li>No subir virus o código malicioso.</li>
+          <li>Respetar la privacidad y los derechos de otros usuarios.</li>
         </ul>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">6. Propiedad intelectual</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">6. Propiedad intelectual</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          Todo el contenido proporcionado por [Nombre de la App], como logos, diseño, software y textos, está protegido por derechos de autor. No puedes reproducirlo, modificarlo o distribuirlo sin autorización expresa.
+          Todo el contenido proporcionado por Minima, como logos, diseño, software y textos, está protegido por derechos de autor. No puedes reproducirlo, modificarlo o distribuirlo sin autorización expresa.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">7. Terminación de cuentas</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">7. Terminación de cuentas</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
           Podemos suspender o eliminar tu cuenta si violas estos Términos o si consideramos que tu comportamiento perjudica a otros usuarios o a la plataforma.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">8. Limitación de responsabilidad</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">8. Limitación de responsabilidad</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          [Nombre de la App] no será responsable por daños directos, indirectos o incidentales derivados del uso o imposibilidad de uso del servicio.
+          Minima no será responsable por daños directos, indirectos o incidentales derivados del uso o imposibilidad de uso del servicio.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">9. Cambios en los términos</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">9. Cambios en los términos</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
           Podemos actualizar estos Términos en cualquier momento. Te notificaremos los cambios relevantes, y el uso continuo del servicio después de dichas actualizaciones constituye tu aceptación de los nuevos términos.
         </p>
 
-        <h2 class="text-xl font-semibold mt-6 mb-4 text-primary-600 dark:text-primary-400">10. Ley aplicable</h2>
+        <h2 class="text-xl font-semibold mt-6 mb-4 text-emerald-700 dark:text-emerald-400">10. Contacto</h2>
         <p class="mb-6 text-gray-700 dark:text-gray-300">
-          Estos Términos se regirán por las leyes de [País o Jurisdicción], sin perjuicio de cualquier conflicto con otras legislaciones.
+          Si tienes alguna pregunta sobre estos Términos y Condiciones, puedes contactarnos a través de nuestro formulario de contacto en la aplicación.
         </p>
       </div>
     </div>
@@ -75,7 +73,7 @@
 export default {
   name: 'TerminosCondiciones',
   metaInfo: {
-    title: 'Términos y Condiciones'
+    title: 'Términos y Condiciones - Minima'
   }
 }
 </script>
@@ -87,7 +85,7 @@ export default {
 }
 
 .prose h2 {
-  color: #2563eb;
+  color: #059669;
   font-weight: 600;
 }
 
@@ -106,6 +104,6 @@ export default {
 }
 
 .dark .prose h2 {
-  color: #60a5fa;
+  color: #34d399;
 }
 </style> 

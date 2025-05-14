@@ -187,7 +187,7 @@ export default {
                       <div class="grid grid-cols-1 place-items-center gap-4 md:grid-cols-2 md:items-start">
                         <!-- Foto -->
                         <div class="flex justify-center items-center pt-2 md:justify-center md:items-center min-h-[220px]">
-                            <div class="relative group mb-4" style="min-width: 200px; min-height: 200px;" @mouseenter="cursorSobreAvatar = true" @mouseleave="cursorSobreAvatar = false">
+                            <div class="relative group mb-4 w-48 h-48" @mouseenter="cursorSobreAvatar = true" @mouseleave="cursorSobreAvatar = false">
                                 <Avatar
                                     :src="usuario?.avatar_url"
                                     :alt="'Avatar de ' + (usuario?.username || usuario?.email)"
@@ -204,13 +204,13 @@ export default {
                                     class="hidden"
                                     :disabled="subiendoAvatar"
                                 />
-                                <div v-if="cursorSobreAvatar && !subiendoAvatar" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-pointer"
+                                <div v-if="cursorSobreAvatar && !subiendoAvatar" class="absolute top-0 left-0 w-48 h-48 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-pointer"
                                     @click="abrirInputAvatar">
                                     <span class="text-white text-center text-xs font-semibold select-none pointer-events-none">
                                         {{ usuario?.avatar_url ? 'Editar imagen de perfil' : 'Añadir imagen de perfil' }}
                                     </span>
                                 </div>
-                                <div v-if="subiendoAvatar" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-wait">
+                                <div v-if="subiendoAvatar" class="absolute top-0 left-0 w-48 h-48 bg-black/60 flex items-center justify-center rounded-full transition-opacity cursor-wait">
                                     <span class="text-white text-center text-xs font-semibold select-none">Subiendo...</span>
                                 </div>
                             </div>

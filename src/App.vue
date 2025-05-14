@@ -80,7 +80,7 @@ export default {
 </script>
 
 <template>
-    <div class="flex flex-col h-full bg-emerald-50 dark:bg-neutral-950" >
+    <div class="flex flex-col h-full bg-white dark:bg-neutral-950" >
         <header role="banner">
             <Navbar :isDark="isDark" @toggle-dark="toggleDarkMode" />
         </header>

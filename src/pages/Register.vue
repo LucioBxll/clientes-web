@@ -21,12 +21,14 @@ export default {
         const mensajeSuccess = ref('');
         const cargando = ref(false);
         const exito = ref(false);
+        const aceptarTerminos = ref(false);
 
         const formularioValido = computed(() => {
             const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return regexCorreo.test(correo.value) && 
                    contrasena.value.length >= 6 && 
-                   nombreUsuario.value.length >= 3;
+                   nombreUsuario.value.length >= 3 &&
+                   aceptarTerminos.value;
         });
 
         const cambiarAvatar = (e) => {
@@ -74,7 +76,8 @@ export default {
             exito,
             formularioValido,
             enviarFormulario,
-            cambiarAvatar
+            cambiarAvatar,
+            aceptarTerminos
         }
     }
 }
@@ -87,7 +90,7 @@ export default {
         <form 
             action="#"
             @submit.prevent="enviarFormulario"
-            class="max-w-md mx-auto p-6 bg-emerald-200 dark:bg-emerald-400 rounded-lg shadow-sm transition-all duration-200"
+            class="max-w-md mx-auto p-8 bg-white dark:bg-neutral-900 rounded-xl shadow border border-emerald-100 dark:border-gray-700"
         >
             <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
             <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
@@ -97,7 +100,7 @@ export default {
                     :placeholder="'Nombre de usuario'"
                     v-model="nombreUsuario"
                     :disabled="cargando"
-                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                    inputClass="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                 />
             </div>
             <div class="mb-6">
@@ -106,7 +109,7 @@ export default {
                     :placeholder="'Correo electrónico'"
                     v-model="correo"
                     :disabled="cargando"
-                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                    inputClass="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                 />
             </div>
             <div class="mb-6">
@@ -115,7 +118,7 @@ export default {
                     :placeholder="'Contraseña'"
                     v-model="contrasena"
                     :disabled="cargando"
-                    inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                    inputClass="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                 />
             </div>
             <div class="mb-6">
@@ -126,13 +129,19 @@ export default {
                     accept="image/*"
                     @change="cambiarAvatar"
                     :disabled="cargando"
-                    class="w-full p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white"
+                    class="block w-full text-sm text-black dark:text-white file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 dark:file:bg-neutral-900 file:text-emerald-700 dark:file:text-emerald-400 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-800"
                 >
+            </div>
+            <div class="mb-6">
+                <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200 text-sm select-none">
+                  <input type="checkbox" v-model="aceptarTerminos" :disabled="cargando" required class="accent-emerald-600 w-4 h-4 rounded" />
+                  Acepto los <router-link to="/terminos" class="text-emerald-700 dark:text-emerald-400 underline hover:text-emerald-900 dark:hover:text-emerald-300 transition-colors" target="_blank">Términos y Condiciones</router-link>
+                </label>
             </div>
             <BaseButton 
                 type="submit"
                 :disabled="!formularioValido || cargando"
-                buttonClass="w-full p-3 rounded-lg bg-gray-900 dark:bg-neutral-950 hover:bg-gray-900 dark:hover:bg-emerald-800 focus:bg-gray-900 dark:focus:bg-gray-900 active:bg-blue-700 dark:active:bg-blue-600 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                buttonClass="w-full p-3 rounded-lg bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {{ cargando ? 'Creando cuenta...' : 'Crear cuenta' }}
             </BaseButton>

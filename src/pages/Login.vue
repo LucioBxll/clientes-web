@@ -60,7 +60,7 @@ export default {
             <form 
                 action="#"
                 @submit.prevent="enviarFormulario"
-                class="p-6 bg-emerald-200 dark:bg-emerald-400 rounded-lg shadow-sm transition-all duration-200"
+                class="max-w-md mx-auto p-8 bg-white dark:bg-neutral-900 rounded-xl shadow border border-emerald-100 dark:border-gray-700"
             >
                 <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
                 <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
@@ -70,7 +70,7 @@ export default {
                         :placeholder="'Correo electrónico'"
                         v-model="credenciales.correo"
                         :disabled="cargando"
-                        inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                        inputClass="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                     />
                 </div>
                 <div class="mb-6">
@@ -79,7 +79,7 @@ export default {
                         :placeholder="'Contraseña'"
                         v-model="credenciales.contrasena"
                         :disabled="cargando"
-                        inputClass="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-emerald-200 dark:bg-neutral-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                        inputClass="w-full p-3 mb-6 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                     />
                 </div>
                 <BaseButton 

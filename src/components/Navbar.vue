@@ -96,7 +96,7 @@ export default {
       <div class="flex justify-between h-16">
         <div class="flex items-center">
           <router-link to="/" class="flex items-center">
-            <img src="/public/images/logo-minima.png" alt="Logo" class="h-8 w-8 mr-2" />
+            <img src="../images/logo-minima.png" alt="Logo" class="h-8 w-8 mr-2" />
             <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors font-lovelo-line-bold">minima</span>
           </router-link>
         </div>
@@ -184,18 +184,18 @@ export default {
     <transition name="slide-x">
       <div v-if="menuAbierto" class="fixed inset-0 z-50 flex">
         <!-- Fondo oscuro -->
-        <div class="fixed inset-0 bg-black bg-opacity-40" @click="alternarMenu"></div>
+        <div class="fixed inset-0 bg-black/40" @click="alternarMenu"></div>
         <!-- Panel lateral -->
-        <div class="ml-auto w-72 max-w-full h-full bg-primary-50 dark:bg-gray-800 shadow-lg flex flex-col relative animate-slide-in-right">
+        <div class="ml-auto w-72 max-w-full h-full bg-white dark:bg-neutral-950 shadow-lg flex flex-col relative animate-slide-in-right">
           <!-- Logo -->
-          <div class="flex items-center justify-between px-4 py-4 border-b border-primary-100 dark:border-gray-700">
+          <div class="flex items-center justify-between px-4 py-4 border-b border-emerald-200 dark:border-gray-700">
             <router-link to="/" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors font-lovelo-line-bold">
               minima
             </router-link>
             <button @click="alternarMenu" class="text-2xl text-emerald-600 dark:text-gray-300 focus:outline-none ml-2">&times;</button>
           </div>
           <!-- Foto y perfil -->
-          <div v-if="usuario.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-primary-100 dark:border-gray-700">
+          <div v-if="usuario.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-emerald-200 dark:border-gray-700">
             <Avatar
               :src="usuario.avatar_url"
               :alt="'Avatar de ' + (usuario.username || usuario.email)"
@@ -204,21 +204,21 @@ export default {
             />
             <router-link
               to="/perfil"
-              class="block text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
+              class="block text-emerald-600 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-neutral-900 rounded-lg px-3 py-2 transition-colors"
               @click="alternarMenu"
             >
               Mi Perfil
             </router-link>
           </div>
           <!-- Navegación -->
-          <div class="flex-1 overflow-y-auto px-2 pt-2 pb-3 space-y-1 flex flex-col border-b border-primary-100 dark:border-gray-700">
+          <div class="flex-1 overflow-y-auto px-2 pt-2 pb-3 space-y-1 flex flex-col border-b border-emerald-200 dark:border-gray-700">
             <router-link 
               v-for="(enlace, index) in enlacesFiltrados()" 
               :key="index"
               :to="enlace.ruta"
               :class="[
-                'block px-3 py-2 relative transition-all duration-200 font-medium',
-                isDark ? 'text-white' : 'text-emerald-600',
+                'block px-3 py-2 relative transition-all duration-200 font-medium rounded-lg',
+                isDark ? 'text-white hover:bg-neutral-900' : 'text-emerald-600 hover:bg-emerald-50',
                 'group',
               ]"
               @click="alternarMenu"
@@ -231,10 +231,10 @@ export default {
             </router-link>
           </div>
           <!-- Modo oscuro/claro -->
-          <div class="px-4 py-4 border-b border-primary-100 dark:border-gray-700 flex items-center">
+          <div class="px-4 py-4 border-b border-emerald-200 dark:border-gray-700 flex items-center">
             <button
               @click="$emit('toggle-dark')"
-              class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200 w-full text-center"
+              class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-neutral-900 transition-all duration-200 w-full text-center"
             >
               <span v-if="isDark">🌞 Modo claro</span>
               <span v-else>🌙 Modo oscuro</span>
@@ -244,7 +244,7 @@ export default {
           <div v-if="usuario.id" class="px-4 py-4">
             <button
               @click="cerrarSesion"
-              class="block w-full text-left text-red-600 hover:bg-emerald-100 dark:hover:bg-gray-700 rounded-lg px-3 py-2"
+              class="block w-full text-left text-red-600 hover:bg-emerald-50 dark:hover:bg-neutral-900 rounded-lg px-3 py-2 transition-colors"
             >
               Cerrar sesión
             </button>
