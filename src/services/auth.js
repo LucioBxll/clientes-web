@@ -25,6 +25,32 @@ let user = {
 // Definimos un array para guardar la lista de observers que quieren ser notificados de los cambios en "user".
 let observers = [];
 
+// Listener global para cambios de sesión de Supabase
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+        // Notificar inmediatamente con los datos mínimos
+        user = {
+            id: session.user.id,
+            email: session.user.email,
+            username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
+        };
+        notifyAll();
+        // Luego, actualizar los datos completos en segundo plano
+        getUserById(session.user.id).then(dbUser => {
+            user = dbUser;
+            notifyAll();
+        }).catch(() => {});
+    } else {
+        // Si no hay sesión, limpiar usuario y notificar
+        user = {
+            id: null,
+            email: null,
+            username: null,
+        };
+        notifyAll();
+    }
+});
+
 /**
  * Obtiene el usuario actualmente autenticado.
  * @returns {Promise<{id: string|null, email: string|null, username: string|null}>}

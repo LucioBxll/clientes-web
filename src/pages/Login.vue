@@ -41,7 +41,7 @@ export default {
                   this.mensajeSuccess = null;
                   this.cargando = false;
                   this.enrutador.push('/perfil');
-                }, restante > 0 ? restante : 0);
+                }, 1500);
             } catch (error) {
                 this.mensajeError = error.message || 'Error al iniciar sesión';
                 setTimeout(() => { this.mensajeError = null; }, 4000);

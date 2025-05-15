@@ -2,14 +2,18 @@
   <transition name="fade-slide-left">
     <div v-if="visible" :class="[alertClass, 'fixed top-6 left-6 z-50 shadow-lg flex items-center gap-4 min-w-[260px] max-w-xs']" role="alert">
       <slot />
-      <button @click="closeAlert" class="ml-auto text-lg font-bold text-gray-400 hover:text-gray-700 dark:hover:text-white focus:outline-none">&times;</button>
+      <button @click="closeAlert" class="ml-auto text-lg font-bold text-gray-400 hover:text-gray-700 dark:hover:text-white focus:outline-none">
+        <XMarkIcon class="w-5 h-5" />
+      </button>
     </div>
   </transition>
 </template>
 
 <script>
+import { XMarkIcon } from '@heroicons/vue/24/outline';
 export default {
   name: 'BaseAlert',
+  components: { XMarkIcon },
   props: {
     type: {
       type: String,

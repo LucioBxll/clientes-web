@@ -214,6 +214,15 @@ export async function obtenerComentariosDeMensaje(mensajeId) {
     return data;
 }
 
+// Actualizar el username en todas las publicaciones de un usuario
+export async function updateUsernameInMessages(userId, newUsername) {
+    const { error } = await supabase
+        .from('global_chat')
+        .update({ username: newUsername })
+        .eq('user_id', userId);
+    if (error) throw error;
+}
+
 // Versión con "Broadcast".
 // Seteamos un "listener" para recibir los mensajes emitidos en tiempo real por el "canal" "global-chat" 
 // (nombre arbitrario).

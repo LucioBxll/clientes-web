@@ -36,7 +36,7 @@ export default {
         mensajeError.value = 'Error al cargar el perfil: ' + (error.message || 'Error desconocido');
       } finally {
         const duracion = Date.now() - inicio;
-        const restante = 3000 - duracion;
+        const restante = 1500 - duracion;
         setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
       }
     };

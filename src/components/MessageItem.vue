@@ -18,9 +18,7 @@
           {{ new Date(mensaje.created_at).toLocaleString() }}
         </time>
         <button @click="toggleComments" class="ml-auto p-2 rounded-full text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors flex items-center gap-1" :aria-label="showComments ? 'Ocultar comentarios' : 'Comentar'">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
+          <ChatBubbleLeftRightIcon class="w-5 h-5" />
           <span class="text-xs text-gray-600 dark:text-gray-300 min-w-[1.5em] text-center">{{ comentarios.length }}</span>
         </button>
       </footer>
@@ -47,14 +45,15 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Avatar from './Avatar.vue';
 import { agregarComentarioAGlobalChat, obtenerComentariosDeMensaje } from '../services/global-chat';
 import { getCurrentUser } from '../services/auth';
+import { ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline';
 
 export default {
   name: 'MessageItem',
-  components: { Avatar },
+  components: { Avatar, ChatBubbleLeftRightIcon },
   props: {
     mensaje: Object
   },
@@ -78,14 +77,15 @@ export default {
       }
     };
 
-    const toggleComments = async () => {
-      showComments.value = !showComments.value;
-      if (showComments.value && comentarios.value.length === 0) {
-        await cargarComentarios();
-      }
+    onMounted(async () => {
+      await cargarComentarios();
       if (!usuarioActual.value) {
         usuarioActual.value = await getCurrentUser();
       }
+    });
+
+    const toggleComments = async () => {
+      showComments.value = !showComments.value;
     };
 
     const enviarComentario = async () => {

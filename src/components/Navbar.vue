@@ -3,10 +3,11 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { subscribeToUserState, logout } from '../services/auth';
 import Avatar from './Avatar.vue';
+import { Bars3Icon, XMarkIcon, SunIcon, MoonIcon } from '@heroicons/vue/24/outline';
 
 export default {
   name: 'BarraNavegacion',
-  components: { Avatar },
+  components: { Avatar, Bars3Icon, XMarkIcon, SunIcon, MoonIcon },
   props: {
     isDark: {
       type: Boolean,
@@ -92,8 +93,8 @@ export default {
 
 <template>
   <nav class="bg-esmerald-50 dark:bg-neutral-950 shadow-sm border-b border-primary-100 dark:border-gray-700 transition-colors duration-200">
-    <div class="max-w-7xl mx-auto px-4">
-      <div class="flex justify-between h-16">
+    <div class="max-w-7xl mx-auto px-2 md:px-4">
+      <div class="flex justify-between h-16 md:pl-2">
         <div class="flex items-center">
           <router-link to="/" class="flex items-center">
             <img src="../images/logo-minima.png" alt="Logo" class="h-8 w-8 mr-2" />
@@ -142,39 +143,19 @@ export default {
             class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200"
             :title="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
           >
-            <span v-if="isDark" class="text-lg">🌞</span>
-            <span v-else class="text-lg">🌙</span>
+            <SunIcon v-if="isDark" class="h-6 w-6" />
+            <MoonIcon v-else class="h-6 w-6" />
           </button>
         </div>
 
         <!-- Botón de menú móvil -->
         <div class="md:hidden flex items-center space-x-2">
-
           <button
             @click="alternarMenu"
             class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200"
           >
-            <svg
-              class="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                v-if="!menuAbierto"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-              <path
-                v-else
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <Bars3Icon v-if="!menuAbierto" class="h-6 w-6" />
+            <XMarkIcon v-else class="h-6 w-6" />
           </button>
         </div>
       </div>
@@ -192,7 +173,7 @@ export default {
             <router-link to="/" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors font-lovelo-line-bold">
               minima
             </router-link>
-            <button @click="alternarMenu" class="text-2xl text-emerald-600 dark:text-gray-300 focus:outline-none ml-2">&times;</button>
+            <button @click="alternarMenu" class="text-2xl text-emerald-600 dark:text-gray-300 focus:outline-none ml-2"><XMarkIcon class="h-6 w-6" /></button>
           </div>
           <!-- Foto y perfil -->
           <div v-if="usuario.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-emerald-200 dark:border-gray-700">

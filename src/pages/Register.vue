@@ -56,7 +56,7 @@ export default {
                 setTimeout(() => {
                     mensajeSuccess.value = '';
                     enrutador.push('/ingresar');
-                }, 4000);
+                }, 1500);
             } catch (err) {
                 mensajeError.value = err.message || 'Error al crear la cuenta. Por favor, intenta nuevamente.';
                 setTimeout(() => { mensajeError.value = ''; }, 4000);

@@ -92,17 +92,62 @@ export default {
 </template>
 
 <style>
-
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 #app {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+/* Estilos globales para mejorar la experiencia de usuario */
+* {
+    cursor: default;
+}
+
+/* Elementos interactivos */
+a, button, [role="button"], 
+input[type="button"], 
+input[type="submit"],
+input[type="reset"],
+select,
+.router-link-active,
+.router-link-exact-active,
+[class*="hover"],
+[class*="cursor-pointer"] {
+    cursor: pointer !important;
+}
+
+/* Campos de entrada y áreas de texto */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea,
+[contenteditable="true"] {
+    cursor: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+/* Evitar selección de texto en elementos no editables */
+p, span, div, h1, h2, h3, h4, h5, h6, li, td, th {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 </style>
 

@@ -1,5 +1,6 @@
 <script>
-import { nextTick } from 'vue';
+import { nextTick, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import MainH1 from '../components/MainH1.vue';
 import { loadLastGlobalChatMessages, saveGlobalChatMessage, subscribeToGlobalChatNewMessages } from '../services/global-chat';
 import { getCurrentUser, subscribeToUserState } from '../services/auth';
@@ -11,10 +12,13 @@ import BaseLoader from '../components/BaseLoader.vue';
 import BaseModal from '../components/BaseModal.vue';
 import supabase from '../services/supabase';
 import Footer from '../components/Footer.vue';
+// Heroicons
+import { HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon } from '@heroicons/vue/24/outline';
 
 export default {
   name: 'ChatGlobal',
-  components: { MainH1, Avatar, MessageItem, BaseAlert, BaseLoader, BaseModal, Footer },
+  components: { MainH1, Avatar, MessageItem, BaseAlert, BaseLoader, BaseModal, Footer,
+    HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon },
   // La propiedad "data" nos permite definir cuáles son los valores del "state" del componente.
   // Entiéndase por "state" los datos propios del componente que pueden variar duranta la vida del mismo.
   // Esta propiedad debe tener una función que retorne un objeto con los datos.
@@ -124,6 +128,15 @@ export default {
       this.mensajes.unshift(mensaje);
     }
   },
+  setup() {
+    const router = useRouter();
+    const irAIngresar = () => {
+      router.push('/ingresar');
+    };
+    return {
+      irAIngresar
+    };
+  },
   async mounted() {
     const inicio = Date.now();
     try {
@@ -155,7 +168,7 @@ export default {
       setTimeout(() => { this.mensajeError = null; }, 4000);
     } finally {
       const duracion = Date.now() - inicio;
-      const restante = 2000 - duracion;
+      const restante = 1500 - duracion;
       await nextTick();
       setTimeout(() => { this.cargando = false; }, restante > 0 ? restante : 0);
     }
@@ -167,28 +180,44 @@ export default {
   <div class="min-h-screen flex bg-white dark:bg-neutral-950">
     <!-- Sidebar izquierdo: Estático -->
     <aside
-      class="hidden md:flex flex-col w-1/5 border-r border-gray-800 bg-esmerald-50 dark:bg-neutral-950 p-4 h-screen sticky top-0">
-      <nav class="flex flex-col gap-4">
-        <router-link to="/"
-          class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-black dark:text-white">
-          <span>🏠</span> Inicio
+      class="hidden md:flex flex-col justify-between w-64 min-w-[220px] max-w-xs h-screen sticky top-0 bg-white dark:bg-neutral-950 border-r border-emerald-200 dark:border-gray-700 py-4 px-2">
+      <!-- Navegación principal -->
+      <nav class="flex flex-col gap-1 mt-2">
+        <router-link to="/" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-semibold text-emerald-700 dark:text-white transition select-none relative group">
+          <HomeIcon class="w-7 h-7" />
+          Inicio
+          <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
         </router-link>
-        <router-link to="/chat-global"
-          class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-black dark:text-white">
-          <span>💬</span> Chat Global
+        <router-link to="/explorar" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
+          <MagnifyingGlassIcon class="w-7 h-7" />
+          Explorar
+          <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
         </router-link>
-        <router-link to="/perfil"
-          class="flex items-center gap-2 font-semibold text-lg hover:text-emerald-400 text-black dark:text-white">
-          <span>👤</span> Perfil
+        <router-link v-if="usuarioActual" to="/notificaciones" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition relative select-none group">
+          <BellIcon class="w-7 h-7" />
+          Notificaciones
+          <span class="absolute left-8 top-1 bg-emerald-600 text-white text-xs rounded-full px-1.5">5</span>
+          <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
+        </router-link>
+        <router-link v-if="usuarioActual" to="/mensajes" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
+          <EnvelopeIcon class="w-7 h-7" />
+          Mensajes
+          <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
+        </router-link>
+        <router-link v-if="usuarioActual" to="/perfil" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
+          <UserCircleIcon class="w-7 h-7" />
+          Perfil
+          <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
         </router-link>
       </nav>
+      <!-- Perfil abajo: sesión iniciada o botón para iniciar sesión -->
     </aside>
 
     <!-- Columna central: Feed Global -->
     <main class="flex-1 flex flex-col items-center">
       <div class="w-full max-w-2xl flex flex-col min-h-screen relative">
         <!-- Encabezado -->
-        <header class="sticky top-0 bg-white dark:bg-neutral-950 z-10 border-b border-emerald-700 p-4">
+        <header class="sticky top-0 bg-white dark:bg-neutral-950 z-10 border-b border-emerald-200 dark:border-gray-700 p-4">
           <h1 class="text-xl font-bold text-emerald-800 dark:text-white">Feed Global</h1>
         </header>
         <div v-if="cargando"
@@ -197,13 +226,13 @@ export default {
         </div>
         <template v-else>
           <!-- Botón flotante para abrir el modal de publicación con tooltip -->
-          <div class="group fixed bottom-8 right-8 z-49 flex flex-col items-center">
+          <div class="group fixed bottom-8 right-8 z-[60] flex flex-col items-center">
             <button v-if="usuarioActual" @click="mostrarModalPublicar = true"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl focus:outline-none relative">
+              class="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-full shadow-lg dark:shadow-emerald-900/50 w-16 h-16 flex items-center justify-center text-3xl focus:outline-none relative transition-all duration-200">
               +
             </button>
             <span v-if="usuarioActual"
-              class="opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded py-1 px-3 mt-2 pointer-events-none select-none shadow-lg">
+              class="opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 dark:bg-gray-700 text-white text-xs rounded py-1 px-3 mt-2 pointer-events-none select-none shadow-lg">
               Publicar
             </span>
           </div>
@@ -232,7 +261,7 @@ export default {
           <section class="flex-1 p-4 space-y-6 ">
             <ul class="flex flex-col gap-6" aria-live="polite" aria-label="Publicaciones del feed">
               <li v-for="mensaje in mensajes.slice(0, publicacionesVisibles)" :key="mensaje.id"
-                class="bg-emerald-100 dark:bg-neutral-900 rounded-xl shadow-lg p-4 border border-emerald-700 dark:border-gray-700">
+                class="bg-emerald-100 dark:bg-neutral-900 rounded-xl shadow-lg p-4 border border-emerald-200 dark:border-gray-700">
                 <MessageItem :mensaje="mensaje">
                   <template #avatar>
                     <Avatar v-if="mensaje.user_id" :src="cacheUsuarios[mensaje.user_id]?.avatar_url"
@@ -256,7 +285,7 @@ export default {
 
     <!-- Sidebar derecho: Estático -->
     <aside
-      class="hidden lg:flex flex-col w-1/4 border-l border-gray-800 bg-esmerald-50 dark:bg-neutral-950 p-4 h-screen sticky top-0 space-y-8">
+      class="hidden lg:flex flex-col w-1/4 border-l border-emerald-200 dark:border-gray-700 bg-esmerald-50 dark:bg-neutral-950 z-48 p-4 h-screen sticky top-0 space-y-8">
       <!-- Otros widgets aquí si los hay -->
       <div>
         <h2 class="font-bold text-lg mb-2 text-white">Tendencias</h2>
