@@ -21,13 +21,13 @@ export default {
     const refMenuPerfil = ref(null);
     const usuario = ref({ id: null, email: null, username: null });
     
-    // Suscribirse a los cambios en el estado del usuario
+
+
     onMounted(() => {
       subscribeToUserState(nuevoEstadoUsuario => {
         usuario.value = nuevoEstadoUsuario;
       });
 
-      // Agregar event listener para cerrar el menú al hacer clic fuera
       document.addEventListener('click', (event) => {
         if (refMenuPerfil.value && !refMenuPerfil.value.contains(event.target)) {
           menuPerfilAbierto.value = false;
@@ -35,7 +35,6 @@ export default {
       });
     });
 
-    // Limpiar event listener al desmontar el componente
     onUnmounted(() => {
       document.removeEventListener('click', (event) => {
         if (refMenuPerfil.value && !refMenuPerfil.value.contains(event.target)) {
@@ -58,7 +57,6 @@ export default {
       menuPerfilAbierto.value = !menuPerfilAbierto.value;
     };
 
-    // Filtrar los enlaces basados en el estado de autenticación
     const enlacesFiltrados = () => {
       return enlacesNavegacion.value.filter(enlace => {
         if (enlace.requiereAuth === undefined) return true;
@@ -69,7 +67,6 @@ export default {
     const cerrarSesion = async () => {
       try {
         await logout();
-        // Redirigir al usuario a la página de inicio de sesión
         window.location.href = '/ingresar';
       } catch (error) {
         console.error('Error al cerrar sesión:', error);
@@ -102,7 +99,6 @@ export default {
           </router-link>
         </div>
 
-        <!-- Enlaces de navegación para desktop -->
         <div class="hidden md:flex items-center space-x-4">
           <router-link 
             v-for="(enlace, index) in enlacesFiltrados()" 
@@ -121,7 +117,6 @@ export default {
             ></span>
           </router-link>
           
-          <!-- Menú de perfil -->
           <div class="relative" v-if="usuario.id" ref="refMenuPerfil">
             <router-link
               to="/perfil"
@@ -137,7 +132,6 @@ export default {
             </router-link>
           </div>
           
-          <!-- Botón de tema -->
           <button
             @click="$emit('toggle-dark')"
             class="p-2 rounded-lg text-emerald-600 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-gray-700 transition-all duration-200"
@@ -148,7 +142,6 @@ export default {
           </button>
         </div>
 
-        <!-- Botón de menú móvil -->
         <div class="md:hidden flex items-center space-x-2">
           <button
             @click="alternarMenu"
@@ -161,7 +154,6 @@ export default {
       </div>
     </div>
 
-    <!-- Offcanvas móvil -->
     <transition name="slide-x">
       <div v-if="menuAbierto" class="fixed inset-0 z-50 flex">
         <!-- Fondo oscuro -->

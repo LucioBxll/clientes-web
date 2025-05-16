@@ -1,11 +1,5 @@
 <script>
-// Acá va la lógica del componente.
-// En los componentes que usan la Options API, debemos exportar como default un objeto con la configuración del componente.
-// Si queremos usar otros componentes, es necesario importarlos.
-// En la Options API, es necesario también declarar los componentes que vamos a usar.
-// Una vez importado correctamente, podemos usarlo en el template con la sintaxis <Componente></Componente> o
-// <Componente />.
-// import Home from './pages/Home.vue';
+
 
 import { subscribeToUserState } from './services/auth';
 import { ref, onMounted, watch } from 'vue';
@@ -13,10 +7,9 @@ import Navbar from './components/Navbar.vue';
 import Footer from './components/Footer.vue';
 
 export default {
-    // El "name" define el nombre del componente. Es opcional.
-    // Se supone que sea igual que el nombre del archivo.
+   
     name: 'Aplicacion',
-    // "components" recibe un objeto donde define los componentes que se van a usar en el <template>.
+    
     components: {
         Navbar,
         Footer
@@ -30,9 +23,7 @@ export default {
         }
     },
     methods: {
-        // handleLogin(userData) {
-        //     this.user = userData;
-        // }
+        
     },
     mounted() {
         // Nos suscribimos al estado de autenticación.

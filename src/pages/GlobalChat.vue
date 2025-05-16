@@ -19,15 +19,7 @@ export default {
   name: 'ChatGlobal',
   components: { MainH1, Avatar, MessageItem, BaseAlert, BaseLoader, BaseModal, Footer,
     HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon },
-  // La propiedad "data" nos permite definir cuáles son los valores del "state" del componente.
-  // Entiéndase por "state" los datos propios del componente que pueden variar duranta la vida del mismo.
-  // Esta propiedad debe tener una función que retorne un objeto con los datos.
-  // data: function() {
-  //     return {}
-  // },
-  // data: () => {
-  //     return {}
-  // },
+  
   data() {
     return {
       mensajes: [],
@@ -39,13 +31,13 @@ export default {
       },
       mensajeError: null,
       usuarioActual: null,
-      cargando: true, // Cambiado a true para que el loader se muestre automáticamente
-      publicacionesVisibles: 10, // cantidad de publicaciones a mostrar
-      usuariosSugeridos: [], // usuarios para 'A quién seguir'
+      cargando: true, 
+      publicacionesVisibles: 10, 
+      usuariosSugeridos: [], 
       mostrarModalPublicar: false
     }
   },
-  // La propiedad "methods" permite definir las funciones que queremos que el componente tenga.
+  
   methods: {
     async obtenerUsuario(idUsuario) {
       if (!idUsuario) return null;
@@ -59,7 +51,6 @@ export default {
       }
     },
     async subirImagenASupabase(file) {
-      // Subir imagen a Supabase Storage y devolver la URL pública
       if (!file) return null;
       const nombreArchivo = `publicaciones/${Date.now()}_${file.name}`;
       const { data, error } = await supabase.storage.from('publicaciones').upload(nombreArchivo, file, { upsert: true });
@@ -88,7 +79,7 @@ export default {
         if (this.nuevoMensaje.imagen) {
           imageUrl = await this.subirImagenASupabase(this.nuevoMensaje.imagen);
         }
-        // Validar de nuevo antes de publicar, por si el usuario se deslogueó justo antes
+        
         if (!this.usuarioActual) {
           this.$router.push('/ingresar');
           return;
@@ -102,7 +93,6 @@ export default {
         this.nuevoMensaje.imagen = null;
         this.nuevoMensaje.preview = null;
       } catch (error) {
-        // Si el error es de autenticación, redirigir sin mostrar error
         if (error.message && error.message.toLowerCase().includes('no autenticado')) {
           this.$router.push('/ingresar');
           return;
@@ -147,15 +137,11 @@ export default {
       this.usuariosSugeridos = todos
         .filter(u => !this.usuarioActual || u.id !== this.usuarioActual.id)
         .slice(0, 3);
-      // Suscribirse a cambios de autenticación
       subscribeToUserState(async (user) => {
         this.usuarioActual = user;
       });
-      // Suscribirse a nuevos mensajes
       subscribeToGlobalChatNewMessages(this.manejarNuevoMensaje);
-      // Cargar mensajes existentes
       this.mensajes = await loadLastGlobalChatMessages();
-      // Precargar los usuarios (y avatares) de los mensajes
       for (const msg of this.mensajes) {
         if (msg.user_id) {
           await this.obtenerUsuario(msg.user_id);
