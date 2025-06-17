@@ -1,7 +1,7 @@
 <script>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { subscribeToUserState, logout } from '../services/auth';
+import { subscribeToUserState, logout, getCurrentUser } from '../services/auth';
 import Avatar from './Avatar.vue';
 import { Bars3Icon, XMarkIcon, SunIcon, MoonIcon } from '@heroicons/vue/24/outline';
 
@@ -20,10 +20,22 @@ export default {
     const menuPerfilAbierto = ref(false);
     const refMenuPerfil = ref(null);
     const usuario = ref({ id: null, email: null, username: null });
-    
+    const cargando = ref(true);
 
+    onMounted(async () => {
+      // Verificar el estado de autenticación inicial
+      try {
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+          usuario.value = currentUser;
+        }
+      } catch (error) {
+        console.error('Error al obtener usuario actual:', error);
+      } finally {
+        cargando.value = false;
+      }
 
-    onMounted(() => {
+      // Suscribirse a cambios en el estado del usuario
       subscribeToUserState(nuevoEstadoUsuario => {
         usuario.value = nuevoEstadoUsuario;
       });
@@ -79,6 +91,7 @@ export default {
       menuPerfilAbierto,
       refMenuPerfil,
       usuario,
+      cargando,
       enlacesFiltrados,
       alternarMenu,
       alternarMenuPerfil,
@@ -117,7 +130,7 @@ export default {
             ></span>
           </router-link>
           
-          <div class="relative" v-if="usuario.id" ref="refMenuPerfil">
+          <div class="relative" v-if="!cargando && usuario.id" ref="refMenuPerfil">
             <router-link
               to="/perfil"
               class="flex items-center max-w-xs text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
@@ -168,7 +181,7 @@ export default {
             <button @click="alternarMenu" class="text-2xl text-emerald-600 dark:text-gray-300 focus:outline-none ml-2"><XMarkIcon class="h-6 w-6" /></button>
           </div>
           <!-- Foto y perfil -->
-          <div v-if="usuario.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-emerald-200 dark:border-gray-700">
+          <div v-if="!cargando && usuario.id" class="px-4 py-4 flex flex-row items-center gap-4 border-b border-emerald-200 dark:border-gray-700">
             <Avatar
               :src="usuario.avatar_url"
               :alt="'Avatar de ' + (usuario.username || usuario.email)"
@@ -214,7 +227,7 @@ export default {
             </button>
           </div>
           <!-- Cerrar sesión -->
-          <div v-if="usuario.id" class="px-4 py-4">
+          <div v-if="!cargando && usuario.id" class="px-4 py-4">
             <button
               @click="cerrarSesion"
               class="block w-full text-left text-red-600 hover:bg-emerald-50 dark:hover:bg-neutral-900 rounded-lg px-3 py-2 transition-colors"

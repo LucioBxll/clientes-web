@@ -12,6 +12,7 @@ import BaseLoader from '../components/BaseLoader.vue';
 import BaseModal from '../components/BaseModal.vue';
 import supabase from '../services/supabase';
 import Footer from '../components/Footer.vue';
+import { uploadPublicationImage } from '../services/storage';
 // Heroicons
 import { HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon } from '@heroicons/vue/24/outline';
 
@@ -52,15 +53,13 @@ export default {
     },
     async subirImagenASupabase(file) {
       if (!file) return null;
-      const nombreArchivo = `publicaciones/${Date.now()}_${file.name}`;
-      const { data, error } = await supabase.storage.from('publicaciones').upload(nombreArchivo, file, { upsert: true });
-      if (error) {
+      try {
+        return await uploadPublicationImage(file);
+      } catch (error) {
         this.mensajeError = 'Error al subir la imagen';
         setTimeout(() => { this.mensajeError = null; }, 4000);
         return null;
       }
-      const { data: urlData } = supabase.storage.from('publicaciones').getPublicUrl(nombreArchivo);
-      return urlData.publicUrl;
     },
     async enviarMensaje() {
       if (!this.usuarioActual) {
@@ -179,18 +178,18 @@ export default {
           Explorar
           <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
         </router-link>
-        <router-link v-if="usuarioActual" to="/notificaciones" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition relative select-none group">
+        <router-link v-if="!cargando && usuarioActual && usuarioActual.id" to="/notificaciones" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition relative select-none group">
           <BellIcon class="w-7 h-7" />
           Notificaciones
           <span class="absolute left-8 top-1 bg-emerald-600 text-white text-xs rounded-full px-1.5">5</span>
           <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
         </router-link>
-        <router-link v-if="usuarioActual" to="/mensajes" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
+        <router-link v-if="!cargando && usuarioActual && usuarioActual.id" to="/mensajes" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
           <EnvelopeIcon class="w-7 h-7" />
           Mensajes
           <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
         </router-link>
-        <router-link v-if="usuarioActual" to="/perfil" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
+        <router-link v-if="!cargando && usuarioActual && usuarioActual.id" to="/perfil" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
           <UserCircleIcon class="w-7 h-7" />
           Perfil
           <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
@@ -213,11 +212,11 @@ export default {
         <template v-else>
           <!-- Botón flotante para abrir el modal de publicación con tooltip -->
           <div class="group fixed bottom-8 right-8 z-[60] flex flex-col items-center">
-            <button v-if="usuarioActual" @click="mostrarModalPublicar = true"
+            <button v-if="!cargando && usuarioActual" @click="mostrarModalPublicar = true"
               class="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-full shadow-lg dark:shadow-emerald-900/50 w-16 h-16 flex items-center justify-center text-3xl focus:outline-none relative transition-all duration-200">
               +
             </button>
-            <span v-if="usuarioActual"
+            <span v-if="!cargando && usuarioActual"
               class="opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 dark:bg-gray-700 text-white text-xs rounded py-1 px-3 mt-2 pointer-events-none select-none shadow-lg">
               Publicar
             </span>
@@ -226,11 +225,13 @@ export default {
           <BaseModal v-if="mostrarModalPublicar" @close="mostrarModalPublicar = false">
             <form action="#" @submit.prevent="enviarMensaje"
               class="flex flex-col gap-2 items-end p-6 bg-white dark:bg-neutral-900 rounded-xl shadow border border-emerald-100 dark:border-gray-700">
-              <textarea id="cuerpo"
+              <label for="gc-cuerpo" class="block text-gray-700 dark:text-gray-300 mb-1 w-full">¿Qué quieres compartir?</label>
+              <textarea id="gc-cuerpo"
                 class="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 resize-none transition"
                 v-model="nuevoMensaje.cuerpo" :disabled="cargando" placeholder="¿Qué quieres compartir?"
                 aria-required="true"></textarea>
-              <input type="file" accept="image/*" @change="handleImagenSeleccionada" :disabled="cargando"
+              <label for="gc-imagen" class="block text-gray-700 dark:text-gray-300 mb-1 w-full">Imagen (opcional)</label>
+              <input id="gc-imagen" type="file" accept="image/*" @change="handleImagenSeleccionada" :disabled="cargando"
                 class="block w-full text-sm text-black dark:text-white file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 dark:file:bg-neutral-900 file:text-emerald-700 dark:file:text-emerald-400 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-800" />
               <div v-if="nuevoMensaje.preview" class="w-full flex justify-start mb-2">
                 <img :src="nuevoMensaje.preview" alt="Preview imagen"

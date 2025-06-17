@@ -54,7 +54,7 @@ export default {
 
 <template>
     <div class="w-full bg-esmerald-50 dark:bg-neutral-950 py-8">
-        <MainH1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">Ingresar a mi cuenta</MainH1>
+        <MainH1 tag="h1" class="text-2xl font-bold text-gray-900 dark:text-white text-center">Ingresar a mi cuenta</MainH1>
 
         <div class="relative max-w-md mx-auto">
             <form 
@@ -65,7 +65,9 @@ export default {
                 <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
                 <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
                 <div class="mb-6">
+                    <label for="login-correo" class="block mb-1 text-gray-700 dark:text-gray-200 font-medium">Correo electrónico</label>
                     <BaseInput
+                        id="login-correo"
                         type="email"
                         :placeholder="'Correo electrónico'"
                         v-model="credenciales.correo"
@@ -74,7 +76,9 @@ export default {
                     />
                 </div>
                 <div class="mb-6">
+                    <label for="login-contrasena" class="block mb-1 text-gray-700 dark:text-gray-200 font-medium">Contraseña</label>
                     <BaseInput
+                        id="login-contrasena"
                         type="password"
                         :placeholder="'Contraseña'"
                         v-model="credenciales.contrasena"

@@ -1,53 +1,3 @@
-<script>
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { getUserById } from '../services/users';
-import supabase from '../services/supabase';
-import Avatar from '../components/Avatar.vue';
-import MessageItem from '../components/MessageItem.vue';
-import BaseLoader from '../components/BaseLoader.vue';
-import BaseAlert from '../components/BaseAlert.vue';
-
-export default {
-  name: 'ProfileFeed',
-  components: { Avatar, MessageItem, BaseLoader, BaseAlert },
-  setup() {
-    const route = useRoute();
-    const userId = route.params.id;
-    const usuario = ref(null);
-    const mensajes = ref([]);
-    const cargando = ref(true);
-    const mensajeError = ref(null);
-
-    const cargarDatos = async () => {
-      const inicio = Date.now();
-      try {
-        cargando.value = true;
-        usuario.value = await getUserById(userId);
-        // Cargar publicaciones de este usuario
-        const { data, error } = await supabase
-          .from('global_chat')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-        if (error) throw error;
-        mensajes.value = data;
-      } catch (error) {
-        mensajeError.value = 'Error al cargar el perfil: ' + (error.message || 'Error desconocido');
-      } finally {
-        const duracion = Date.now() - inicio;
-        const restante = 1500 - duracion;
-        setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
-      }
-    };
-
-    onMounted(cargarDatos);
-
-    return { usuario, mensajes, cargando, mensajeError };
-  }
-};
-</script>
-
 <template>
   <div class="min-h-screen bg-blue-50 dark:bg-neutral-950 flex flex-col items-center">
     <div class="w-full max-w-2xl flex flex-col min-h-screen relative">
@@ -90,4 +40,48 @@ export default {
       </div>
     </div>
   </div>
-</template> 
+</template>
+
+<script>
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { getUserById } from '../services/users';
+import { getMessagesByUserId } from '../services/global-chat';
+import Avatar from '../components/Avatar.vue';
+import MessageItem from '../components/MessageItem.vue';
+import BaseLoader from '../components/BaseLoader.vue';
+import BaseAlert from '../components/BaseAlert.vue';
+
+export default {
+  name: 'ProfileFeed',
+  components: { Avatar, MessageItem, BaseLoader, BaseAlert },
+  setup() {
+    const route = useRoute();
+    const userId = route.params.id;
+    const usuario = ref(null);
+    const mensajes = ref([]);
+    const cargando = ref(true);
+    const mensajeError = ref(null);
+
+    const cargarDatos = async () => {
+      const inicio = Date.now();
+      try {
+        cargando.value = true;
+        usuario.value = await getUserById(userId);
+        // Cargar publicaciones de este usuario usando el servicio
+        mensajes.value = await getMessagesByUserId(userId);
+      } catch (error) {
+        mensajeError.value = 'Error al cargar el perfil: ' + (error.message || 'Error desconocido');
+      } finally {
+        const duracion = Date.now() - inicio;
+        const restante = 1500 - duracion;
+        setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
+      }
+    };
+
+    onMounted(cargarDatos);
+
+    return { usuario, mensajes, cargando, mensajeError };
+  }
+};
+</script> 

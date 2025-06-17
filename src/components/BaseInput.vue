@@ -5,8 +5,9 @@
       :placeholder="placeholder"
       :disabled="disabled"
       :class="inputClass"
-      v-model="inputValue"
-      @input="$emit('update:modelValue', inputValue)"
+      v-bind="$attrs"
+      :value="modelValue"
+      @input="$emit('update:modelValue', $event.target.value)"
     />
   </div>
 </template>
@@ -31,16 +32,6 @@ export default {
     inputClass: {
       type: String,
       default: ''
-    }
-  },
-  computed: {
-    inputValue: {
-      get() {
-        return this.modelValue;
-      },
-      set(val) {
-        this.$emit('update:modelValue', val);
-      }
     }
   }
 }

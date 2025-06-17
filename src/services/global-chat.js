@@ -196,3 +196,23 @@ export async function updateUsernameInMessages(userId, newUsername) {
     if (error) throw error;
 }
 
+export async function getMessagesByUserId(userId) {
+    const { data, error } = await supabase
+        .from('global_chat')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+}
+
+// Nueva función: obtener mensajes con comentarios usando join
+export async function getMessagesWithComments() {
+    const { data, error } = await supabase
+        .from('global_chat')
+        .select('*, comentarios(*)')
+        .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+}
+

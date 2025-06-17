@@ -85,7 +85,7 @@ export default {
 
 <template>
     <div class="w-full bg-esmerald-50 dark:bg-neutral-950 py-8">
-        <MainH1 class="text-2xl font-bold text-gray-900 dark:text-white text-center">Crear una nueva cuenta</MainH1>
+        <MainH1 tag="h1" class="text-2xl font-bold text-gray-900 dark:text-white text-center">Crear una nueva cuenta</MainH1>
 
         <form 
             action="#"
@@ -95,37 +95,49 @@ export default {
             <BaseAlert v-if="mensajeError" type="error">{{ mensajeError }}</BaseAlert>
             <BaseSuccess v-if="mensajeSuccess">{{ mensajeSuccess }}</BaseSuccess>
             <div class="mb-6">
+                <label for="register-nombreUsuario" class="block mb-1 text-gray-700 dark:text-gray-200 font-medium">Nombre de usuario</label>
                 <BaseInput
+                    id="register-nombreUsuario"
                     type="text"
                     :placeholder="'Nombre de usuario'"
                     v-model="nombreUsuario"
                     :disabled="cargando"
-                    inputClass="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
+                    inputClass="w-full p-3 mb-1 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                 />
+                <p class="text-xs text-gray-500 dark:text-gray-400 ml-1">Mínimo 3 caracteres.</p>
+                <p v-if="nombreUsuario && nombreUsuario.length > 0 && nombreUsuario.length < 3" class="text-xs text-red-500 ml-1 mt-1">El nombre de usuario debe tener al menos 3 caracteres.</p>
             </div>
             <div class="mb-6">
+                <label for="register-correo" class="block mb-1 text-gray-700 dark:text-gray-200 font-medium">Correo electrónico</label>
                 <BaseInput
+                    id="register-correo"
                     type="email"
                     :placeholder="'Correo electrónico'"
                     v-model="correo"
                     :disabled="cargando"
-                    inputClass="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
+                    inputClass="w-full p-3 mb-1 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                 />
+                <p class="text-xs text-gray-500 dark:text-gray-400 ml-1">Debe ser un correo electrónico válido.</p>
+                <p v-if="correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)" class="text-xs text-red-500 ml-1 mt-1">El correo electrónico no es válido.</p>
             </div>
             <div class="mb-6">
+                <label for="register-contrasena" class="block mb-1 text-gray-700 dark:text-gray-200 font-medium">Contraseña</label>
                 <BaseInput
+                    id="register-contrasena"
                     type="password"
                     :placeholder="'Contraseña'"
                     v-model="contrasena"
                     :disabled="cargando"
-                    inputClass="w-full p-3 mb-4 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
+                    inputClass="w-full p-3 mb-1 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 placeholder-gray-400 transition"
                 />
+                <p class="text-xs text-gray-500 dark:text-gray-400 ml-1">Mínimo 6 caracteres.</p>
+                <p v-if="contrasena && contrasena.length > 0 && contrasena.length < 6" class="text-xs text-red-500 ml-1 mt-1">La contraseña debe tener al menos 6 caracteres.</p>
             </div>
             <div class="mb-6">
-                <label for="avatar" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Imagen de perfil (opcional)</label>
+                <label for="register-avatar" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Imagen de perfil (opcional)</label>
                 <input
                     type="file"
-                    id="avatar"
+                    id="register-avatar"
                     accept="image/*"
                     @change="cambiarAvatar"
                     :disabled="cargando"

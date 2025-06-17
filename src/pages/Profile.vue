@@ -1,198 +1,3 @@
-<script>
-import { ref, onMounted } from 'vue';
-import { getCurrentUser, logout } from '../services/auth';
-import Avatar from '../components/Avatar.vue';
-import supabase from '../services/supabase';
-import { upsertUser } from '../services/users';
-import { loadLastGlobalChatMessages, updateUsernameInMessages } from '../services/global-chat';
-import ProfileForm from '../components/ProfileForm.vue';
-import BaseModal from '../components/BaseModal.vue';
-import BaseLoader from '../components/BaseLoader.vue';
-import BaseSuccess from '../components/BaseSuccess.vue';
-import BaseAlert from '../components/BaseAlert.vue';
-import { EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
-
-export default {
-    name: 'Perfil',
-    components: { Avatar, ProfileForm, BaseModal, BaseLoader, BaseSuccess, BaseAlert, EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon },
-    setup() {
-        const usuario = ref(null);
-        const cargando = ref(true);
-        const subiendoAvatar = ref(false);
-        const mensajeError = ref('');
-        const mensajeSuccess = ref('');
-        const archivoNuevoAvatar = ref(null);
-        const inputAvatar = ref(null);
-        const cursorSobreAvatar = ref(false);
-        const listaPublicaciones = ref([]);
-        const mostrarModalEdicion = ref(false);
-        const datosEdicion = ref({ nombreUsuario: '', descripcion: '', email: '' });
-
-        onMounted(async () => {
-            const inicio = Date.now();
-            try {
-                usuario.value = await getCurrentUser();
-                // Traer mensajes del chat global de este usuario
-                const todosMensajes = await loadLastGlobalChatMessages();
-                listaPublicaciones.value = todosMensajes.filter(msg => msg.user_id === usuario.value.id);
-                // Inicializar descripción si existe
-                if (usuario.value) {
-                    datosEdicion.value = {
-                        nombreUsuario: usuario.value.username,
-                        descripcion: usuario.value.descripcion || '',
-                        email: usuario.value.email
-                    };
-                }
-            } catch (err) {
-                mensajeError.value = 'Error al cargar el perfil';
-                setTimeout(() => { mensajeError.value = ''; }, 4000);
-            } finally {
-                const duracion = Date.now() - inicio;
-                const restante = 1500 - duracion;
-                setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
-            }
-        });
-
-        const cambiarAvatar = (e) => {
-            archivoNuevoAvatar.value = e.target.files[0];
-            if (archivoNuevoAvatar.value) {
-                subirNuevoAvatar();
-            }
-        };
-
-        const abrirInputAvatar = () => {
-            if (inputAvatar.value) inputAvatar.value.click();
-        };
-
-        const subirNuevoAvatar = async () => {
-            if (!archivoNuevoAvatar.value || !usuario.value?.id) return;
-            subiendoAvatar.value = true;
-            mensajeError.value = '';
-            mensajeSuccess.value = '';
-            try {
-                // Subir imagen
-                const archivo = archivoNuevoAvatar.value;
-                const extension = archivo.name.split('.').pop();
-                const nombreArchivo = `${usuario.value.id}/${Date.now()}.${extension}`;
-                const { error: errorSubida } = await supabase.storage
-                    .from('avatars')
-                    .upload(nombreArchivo, archivo, { upsert: true });
-                if (errorSubida) throw errorSubida;
-                const { data: datosUrlPublica } = supabase
-                    .storage
-                    .from('avatars')
-                    .getPublicUrl(nombreArchivo);
-                const urlAvatar = datosUrlPublica.publicUrl;
-                // Actualizar usuario en la base
-                await upsertUser({ ...usuario.value, avatar_url: urlAvatar });
-                usuario.value.avatar_url = urlAvatar;
-                archivoNuevoAvatar.value = null;
-                mensajeSuccess.value = '¡Avatar actualizado correctamente!';
-                setTimeout(() => { mensajeSuccess.value = ''; }, 4000);
-            } catch (err) {
-                mensajeError.value = 'Error al subir la imagen de perfil';
-                setTimeout(() => { mensajeError.value = ''; }, 4000);
-            } finally {
-                subiendoAvatar.value = false;
-            }
-        };
-
-        const abrirModalEdicion = () => {
-            if (usuario.value) {
-                datosEdicion.value = {
-                  nombreUsuario: usuario.value.username,
-                  descripcion: usuario.value.descripcion || '',
-                  email: usuario.value.email
-                };
-                mostrarModalEdicion.value = true;
-            }
-        };
-        const cerrarModalEdicion = () => {
-            mostrarModalEdicion.value = false;
-        };
-        const guardarCambiosUsuario = async (form) => {
-            const inicio = Date.now();
-            try {
-                cargando.value = true;
-                mensajeError.value = '';
-                mensajeSuccess.value = '';
-                let avatarUrl = usuario.value.avatar_url || null;
-                // Si se seleccionó una nueva imagen, subirla
-                if (form.avatar) {
-                    const archivo = form.avatar;
-                    const extension = archivo.name.split('.').pop();
-                    const nombreArchivo = `${usuario.value.id}/${Date.now()}.${extension}`;
-                    const { error: errorSubida } = await supabase.storage
-                        .from('avatars')
-                        .upload(nombreArchivo, archivo, { upsert: true });
-                    if (errorSubida) throw errorSubida;
-                    const { data: datosUrlPublica } = supabase.storage
-                        .from('avatars')
-                        .getPublicUrl(nombreArchivo);
-                    avatarUrl = datosUrlPublica.publicUrl;
-                }
-                // Construir el objeto a guardar
-                const datosActualizados = {
-                    id: usuario.value.id,
-                    email: form.email,
-                    username: form.nombreUsuario,
-                    descripcion: form.descripcion,
-                    avatar_url: avatarUrl,
-                    status: usuario.value.status || 'online'
-                };
-                // Guardar en la base y actualizar el usuario local con la respuesta
-                const usuarioActualizado = await upsertUser(datosActualizados);
-                // Actualizar el username en todas las publicaciones
-                await updateUsernameInMessages(usuarioActualizado.id, usuarioActualizado.username);
-                // Refrescar usuario desde la base
-                usuario.value = await getCurrentUser();
-                mostrarModalEdicion.value = false;
-                mensajeSuccess.value = '¡Perfil actualizado correctamente!';
-                setTimeout(() => { mensajeSuccess.value = ''; }, 4000);
-            } catch (err) {
-                mensajeError.value = 'Error al actualizar los datos: ' + (err.message || err);
-                setTimeout(() => { mensajeError.value = ''; }, 4000);
-            } finally {
-                const duracion = Date.now() - inicio;
-                const restante = 1500 - duracion;
-                setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
-            }
-        };
-
-        const handleLogout = async () => {
-            try {
-                await logout();
-                window.location.href = '/ingresar';
-            } catch (error) {
-                mensajeError.value = 'Error al cerrar sesión';
-                setTimeout(() => { mensajeError.value = ''; }, 4000);
-            }
-        };
-
-        return {
-            usuario,
-            cargando,
-            mensajeError,
-            mensajeSuccess,
-            archivoNuevoAvatar,
-            subiendoAvatar,
-            cambiarAvatar,
-            subirNuevoAvatar,
-            inputAvatar,
-            abrirInputAvatar,
-            cursorSobreAvatar,
-            listaPublicaciones,
-            mostrarModalEdicion,
-            datosEdicion,
-            abrirModalEdicion,
-            cerrarModalEdicion,
-            guardarCambiosUsuario,
-            handleLogout
-        };
-    }
-};
-</script>
-
 <template>
     <div class="w-full min-h-screen bg-white dark:bg-neutral-950">
         <div class="max-w-2xl mx-auto">
@@ -282,4 +87,183 @@ export default {
             </template>
         </div>
     </div>
-</template> 
+</template>
+
+<script>
+import { ref, onMounted } from 'vue';
+import { getCurrentUser, logout } from '../services/auth';
+import Avatar from '../components/Avatar.vue';
+import supabase from '../services/supabase';
+import { upsertUser } from '../services/users';
+import { loadLastGlobalChatMessages, updateUsernameInMessages } from '../services/global-chat';
+import ProfileForm from '../components/ProfileForm.vue';
+import BaseModal from '../components/BaseModal.vue';
+import BaseLoader from '../components/BaseLoader.vue';
+import BaseSuccess from '../components/BaseSuccess.vue';
+import BaseAlert from '../components/BaseAlert.vue';
+import { EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
+import { uploadUserAvatar } from '../services/storage';
+
+export default {
+    name: 'Perfil',
+    components: { Avatar, ProfileForm, BaseModal, BaseLoader, BaseSuccess, BaseAlert, EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon },
+    setup() {
+        const usuario = ref(null);
+        const cargando = ref(true);
+        const subiendoAvatar = ref(false);
+        const mensajeError = ref('');
+        const mensajeSuccess = ref('');
+        const archivoNuevoAvatar = ref(null);
+        const inputAvatar = ref(null);
+        const cursorSobreAvatar = ref(false);
+        const listaPublicaciones = ref([]);
+        const mostrarModalEdicion = ref(false);
+        const datosEdicion = ref({ nombreUsuario: '', descripcion: '', email: '' });
+
+        onMounted(async () => {
+            const inicio = Date.now();
+            try {
+                usuario.value = await getCurrentUser();
+                // Traer mensajes del chat global de este usuario
+                const todosMensajes = await loadLastGlobalChatMessages();
+                listaPublicaciones.value = todosMensajes.filter(msg => msg.user_id === usuario.value.id);
+                // Inicializar descripción si existe
+                if (usuario.value) {
+                    datosEdicion.value = {
+                        nombreUsuario: usuario.value.username,
+                        descripcion: usuario.value.descripcion || '',
+                        email: usuario.value.email
+                    };
+                }
+            } catch (err) {
+                mensajeError.value = 'Error al cargar el perfil';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
+            } finally {
+                const duracion = Date.now() - inicio;
+                const restante = 1500 - duracion;
+                setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
+            }
+        });
+
+        const cambiarAvatar = (e) => {
+            archivoNuevoAvatar.value = e.target.files[0];
+            if (archivoNuevoAvatar.value) {
+                subirNuevoAvatar();
+            }
+        };
+
+        const abrirInputAvatar = () => {
+            if (inputAvatar.value) inputAvatar.value.click();
+        };
+
+        const subirNuevoAvatar = async () => {
+            if (!archivoNuevoAvatar.value || !usuario.value?.id) return;
+            subiendoAvatar.value = true;
+            mensajeError.value = '';
+            mensajeSuccess.value = '';
+            try {
+                // Subir imagen y obtener URL pública usando el servicio
+                const urlAvatar = await uploadUserAvatar(usuario.value.id, archivoNuevoAvatar.value);
+                // Actualizar usuario en la base
+                await upsertUser({ ...usuario.value, avatar_url: urlAvatar });
+                usuario.value.avatar_url = urlAvatar;
+                archivoNuevoAvatar.value = null;
+                mensajeSuccess.value = '¡Avatar actualizado correctamente!';
+                setTimeout(() => { mensajeSuccess.value = ''; }, 4000);
+            } catch (err) {
+                mensajeError.value = 'Error al subir la imagen de perfil';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
+            } finally {
+                subiendoAvatar.value = false;
+            }
+        };
+
+        const abrirModalEdicion = () => {
+            if (usuario.value) {
+                datosEdicion.value = {
+                  nombreUsuario: usuario.value.username,
+                  descripcion: usuario.value.descripcion || '',
+                  email: usuario.value.email
+                };
+                mostrarModalEdicion.value = true;
+            }
+        };
+        const cerrarModalEdicion = () => {
+            mostrarModalEdicion.value = false;
+        };
+        const guardarCambiosUsuario = async (form) => {
+            const inicio = Date.now();
+            try {
+                cargando.value = true;
+                mensajeError.value = '';
+                mensajeSuccess.value = '';
+                let avatarUrl = usuario.value.avatar_url || null;
+                // Si se seleccionó una nueva imagen, subirla
+                if (form.avatar) {
+                    try {
+                        avatarUrl = await uploadUserAvatar(usuario.value.id, form.avatar);
+                    } catch (error) {
+                        throw new Error('Error al subir el avatar');
+                    }
+                }
+                // Construir el objeto a guardar
+                const datosActualizados = {
+                    id: usuario.value.id,
+                    email: form.email,
+                    username: form.nombreUsuario,
+                    descripcion: form.descripcion,
+                    avatar_url: avatarUrl,
+                    status: usuario.value.status || 'online'
+                };
+                // Guardar en la base y actualizar el usuario local con la respuesta
+                const usuarioActualizado = await upsertUser(datosActualizados);
+                // Actualizar el username en todas las publicaciones
+                await updateUsernameInMessages(usuarioActualizado.id, usuarioActualizado.username);
+                // Refrescar usuario desde la base
+                usuario.value = await getCurrentUser();
+                mostrarModalEdicion.value = false;
+                mensajeSuccess.value = '¡Perfil actualizado correctamente!';
+                setTimeout(() => { mensajeSuccess.value = ''; }, 4000);
+            } catch (err) {
+                mensajeError.value = 'Error al actualizar los datos: ' + (err.message || err);
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
+            } finally {
+                const duracion = Date.now() - inicio;
+                const restante = 1500 - duracion;
+                setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
+            }
+        };
+
+        const handleLogout = async () => {
+            try {
+                await logout();
+                window.location.href = '/ingresar';
+            } catch (error) {
+                mensajeError.value = 'Error al cerrar sesión';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
+            }
+        };
+
+        return {
+            usuario,
+            cargando,
+            mensajeError,
+            mensajeSuccess,
+            archivoNuevoAvatar,
+            subiendoAvatar,
+            cambiarAvatar,
+            subirNuevoAvatar,
+            inputAvatar,
+            abrirInputAvatar,
+            cursorSobreAvatar,
+            listaPublicaciones,
+            mostrarModalEdicion,
+            datosEdicion,
+            abrirModalEdicion,
+            cerrarModalEdicion,
+            guardarCambiosUsuario,
+            handleLogout
+        };
+    }
+};
+</script> 
