@@ -14,8 +14,8 @@
       <!-- Contenido de la publicación -->
       <div class="flex h-full">
         <!-- Columna izquierda: Imagen -->
-        <div class="flex-1 bg-gray-100 dark:bg-neutral-800 flex flex-col items-center justify-between">
-          <div class="flex-1 flex items-center justify-center w-full">
+        <div class="flex-1 bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+          <div class="flex-1 flex items-center justify-center w-full h-full">
             <img 
               v-if="publicacion.image_url" 
               :src="publicacion.image_url" 
@@ -24,29 +24,6 @@
             />
             <div v-else class="w-full h-full flex items-center justify-center">
               <span class="text-gray-500 dark:text-gray-400 text-lg">Sin imagen</span>
-            </div>
-          </div>
-          <!-- Formulario para comentar en la columna izquierda -->
-          <div class="w-full p-4 border-t border-gray-200 dark:border-gray-700">
-            <div v-if="usuario">
-              <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Agregar un comentario</h4>
-              <form @submit.prevent="enviarComentario" class="flex gap-3">
-                <input 
-                  v-model="nuevoComentario" 
-                  type="text" 
-                  placeholder="Escribe un comentario..." 
-                  class="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" 
-                  :disabled="enviandoComentario" 
-                />
-                <button 
-                  type="submit" 
-                  class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors" 
-                  :disabled="enviandoComentario || !nuevoComentario.trim()"
-                >
-                  <span v-if="enviandoComentario">Enviando...</span>
-                  <span v-else>Comentar</span>
-                </button>
-              </form>
             </div>
           </div>
         </div>
@@ -78,48 +55,38 @@
                 {{ publicacion.body }}
               </p>
             </div>
+
+            <!-- Footer con botón de comentarios -->
+            <footer class="flex items-center gap-4 mt-4">
+              <time class="text-xs md:text-sm text-gray-500 dark:text-gray-400" :datetime="publicacion.created_at">
+                {{ new Date(publicacion.created_at).toLocaleString() }}
+              </time>
+              <button @click="toggleComments" class="ml-auto p-2 rounded-full text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors flex items-center gap-1" :aria-label="showComments ? 'Ocultar comentarios' : 'Comentar'">
+                <ChatBubbleLeftRightIcon class="w-5 h-5" />
+                <span class="text-xs text-gray-600 dark:text-gray-300 min-w-[1.5em] text-center">{{ comentarios.length }}</span>
+              </button>
+            </footer>
           </div>
 
-          <!-- Sección de comentarios -->
-          <div class="flex-1 flex flex-col">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                <ChatBubbleLeftRightIcon class="w-5 h-5 text-emerald-600" />
-                Comentarios ({{ publicacion.comentarios?.length || 0 }})
-              </h3>
-            </div>
-
-            <!-- Lista de comentarios -->
-            <div class="flex-1 overflow-y-auto p-4">
-              <div v-if="!publicacion.comentarios || publicacion.comentarios.length === 0" 
-                   class="text-center text-gray-500 dark:text-gray-400 py-8">
-                No hay comentarios aún.
-              </div>
-              <div v-else class="space-y-4">
-                <div v-for="comentario in publicacion.comentarios" 
-                     :key="comentario.id" 
-                     class="flex items-start gap-3 bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
-                  <Avatar 
-                    :src="comentario.avatar_url" 
-                    :alt="'Avatar de ' + comentario.username" 
-                    :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" 
-                    img-class="h-8 w-8 rounded-full object-cover border border-emerald-400" 
-                  />
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-1">
-                      <span class="font-semibold text-sm text-emerald-700 dark:text-emerald-400">
-                        {{ comentario.username }}
-                      </span>
-                      <span class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ new Date(comentario.created_at).toLocaleString() }}
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-900 dark:text-white">
-                      {{ comentario.body }}
-                    </p>
+          <!-- Sección de comentarios expandible -->
+          <div v-if="showComments" class="flex-1 flex flex-col border-t border-gray-200 dark:border-gray-700">
+            <div class="p-4">
+              <div v-if="cargandoComentarios" class="text-xs text-gray-500 dark:text-gray-400">Cargando comentarios...</div>
+              <ul v-else class="space-y-2 mb-2">
+                <li v-for="comentario in comentarios" :key="comentario.id" class="flex items-start gap-2">
+                  <Avatar :src="comentario.avatar_url" :alt="'Avatar de ' + comentario.username" :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" img-class="h-7 w-7 rounded-full object-cover border-2 border-emerald-400" />
+                  <div>
+                    <span class="font-semibold text-xs text-emerald-700 dark:text-emerald-400">{{ comentario.username }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">{{ new Date(comentario.created_at).toLocaleString() }}</span>
+                    <div class="text-xs text-gray-900 dark:text-white">{{ comentario.body }}</div>
                   </div>
-                </div>
-              </div>
+                </li>
+              </ul>
+              <form v-if="usuarioActual" @submit.prevent="enviarComentario" class="flex items-end gap-2 mt-2">
+                <input v-model="nuevoComentario" type="text" placeholder="Escribe un comentario..." class="flex-1 p-2 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" :disabled="enviandoComentario" />
+                <button type="submit" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-sm rounded-lg disabled:opacity-50 transition-colors" :disabled="enviandoComentario || !nuevoComentario.trim()">Comentar</button>
+              </form>
+              <div v-if="errorComentario" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ errorComentario }}</div>
             </div>
           </div>
         </div>
@@ -129,10 +96,11 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { XMarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline';
 import Avatar from './Avatar.vue';
 import { agregarComentarioAGlobalChat, obtenerComentariosDeMensaje } from '../services/global-chat';
+import { getCurrentUser } from '../services/auth';
 
 export default {
   name: 'PublicationPreview',
@@ -153,57 +121,105 @@ export default {
   },
   emits: ['cerrar', 'comentario-enviado'],
   setup(props, { emit }) {
+    const showComments = ref(false);
+    const comentarios = ref([]);
     const nuevoComentario = ref('');
+    const cargandoComentarios = ref(false);
     const enviandoComentario = ref(false);
+    const usuarioActual = ref(null);
+    const errorComentario = ref(null);
+
+    const cargarComentarios = async () => {
+      cargandoComentarios.value = true;
+      try {
+        comentarios.value = await obtenerComentariosDeMensaje(props.publicacion.id);
+      } catch (e) {
+        comentarios.value = [];
+      } finally {
+        cargandoComentarios.value = false;
+      }
+    };
 
     const cerrarVistaPrevia = () => {
       emit('cerrar');
     };
 
-    const enviarComentario = async () => {
-      if (!props.usuario || !props.publicacion.id) return;
+    const toggleComments = async () => {
+      showComments.value = !showComments.value;
+      if (showComments.value && comentarios.value.length === 0) {
+        await cargarComentarios();
+      }
+    };
 
+    const enviarComentario = async () => {
+      if (!usuarioActual.value) {
+        errorComentario.value = 'Debes iniciar sesión para comentar.';
+        return;
+      }
+      if (!nuevoComentario.value.trim()) return;
+      enviandoComentario.value = true;
+      errorComentario.value = null;
       try {
-        enviandoComentario.value = true;
-        
-        const comentario = nuevoComentario.value;
-        if (!comentario || !comentario.trim()) {
-          throw new Error('El comentario no puede estar vacío');
-        }
-        
-        // Agregar el comentario usando el servicio
-        await agregarComentarioAGlobalChat(props.publicacion.id, comentario, props.usuario);
-        
-        // Recargar comentarios
-        const comentariosActualizados = await obtenerComentariosDeMensaje(props.publicacion.id);
-        
-        // Limpiar el formulario
+        await agregarComentarioAGlobalChat(props.publicacion.id, nuevoComentario.value, usuarioActual.value);
         nuevoComentario.value = '';
+        await cargarComentarios();
         
-        // Emitir evento para actualizar la publicación
+        // Emitir evento para actualizar la publicación en el feed
         emit('comentario-enviado', {
           publicacionId: props.publicacion.id,
-          comentarios: comentariosActualizados
+          comentarios: comentarios.value
         });
-      } catch (error) {
-        console.error('Error al enviar el comentario:', error);
-        alert('Error al enviar el comentario. Inténtalo de nuevo.');
+      } catch (e) {
+        errorComentario.value = 'Error al comentar.';
       } finally {
         enviandoComentario.value = false;
       }
     };
 
-    // Limpiar formulario cuando se cierra el modal
-    watch(() => props.mostrar, (nuevoValor) => {
-      if (!nuevoValor) {
+    // Cargar comentarios cuando se abre el modal
+    watch(() => props.mostrar, async (nuevoValor) => {
+      if (nuevoValor) {
+        showComments.value = true; // Mostrar comentarios automáticamente
+        
+        // Si ya hay comentarios cargados en la publicación, usarlos
+        if (props.publicacion.comentarios && props.publicacion.comentarios.length > 0) {
+          comentarios.value = props.publicacion.comentarios;
+        } else {
+          // Si no hay comentarios cargados, cargarlos
+          await cargarComentarios();
+        }
+      } else {
+        // Limpiar estado cuando se cierra
+        showComments.value = false;
         nuevoComentario.value = '';
+        errorComentario.value = null;
+      }
+    });
+
+    // Observar cambios en los comentarios de la publicación (cuando vienen del feed)
+    watch(() => props.publicacion.comentarios, (nuevosComentarios) => {
+      if (nuevosComentarios && Array.isArray(nuevosComentarios)) {
+        comentarios.value = nuevosComentarios;
+      }
+    }, { immediate: true });
+
+    // Obtener usuario actual al montar
+    onMounted(async () => {
+      if (!usuarioActual.value) {
+        usuarioActual.value = await getCurrentUser();
       }
     });
 
     return {
+      showComments,
+      comentarios,
       nuevoComentario,
+      cargandoComentarios,
       enviandoComentario,
+      usuarioActual,
+      errorComentario,
       cerrarVistaPrevia,
+      toggleComments,
       enviarComentario
     };
   }

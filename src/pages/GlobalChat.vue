@@ -275,7 +275,11 @@ export default {
             <ul class="flex flex-col gap-6" aria-live="polite" aria-label="Publicaciones del feed">
               <li v-for="mensaje in mensajes.slice(0, publicacionesVisibles)" :key="mensaje.id"
                 class="bg-emerald-100 dark:bg-neutral-900 rounded-xl shadow-lg p-4 border border-emerald-200 dark:border-gray-700">
-                <MessageItem :mensaje="mensaje" @abrir-vista-previa="abrirVistaPreviaPublicacion">
+                <MessageItem 
+                  :mensaje="mensaje" 
+                  @abrir-vista-previa="abrirVistaPreviaPublicacion"
+                  @comentario-enviado="actualizarComentariosPublicacion"
+                >
                   <template #avatar>
                     <Avatar v-if="mensaje.user_id" :src="cacheUsuarios[mensaje.user_id]?.avatar_url"
                       :alt="'Avatar de ' + (cacheUsuarios[mensaje.user_id]?.username || cacheUsuarios[mensaje.user_id]?.email)"

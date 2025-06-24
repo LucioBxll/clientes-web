@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Avatar from './Avatar.vue';
 import { agregarComentarioAGlobalChat, obtenerComentariosDeMensaje } from '../services/global-chat';
 import { getCurrentUser } from '../services/auth';
@@ -63,7 +63,7 @@ export default {
   props: {
     mensaje: Object
   },
-  emits: ['abrir-vista-previa'],
+  emits: ['abrir-vista-previa', 'comentario-enviado'],
   setup(props, { emit }) {
     const showComments = ref(false);
     const comentarios = ref([]);
@@ -84,8 +84,21 @@ export default {
       }
     };
 
+    // Observar cambios en los comentarios del mensaje (cuando vienen del modal)
+    watch(() => props.mensaje.comentarios, (nuevosComentarios) => {
+      if (nuevosComentarios && Array.isArray(nuevosComentarios)) {
+        comentarios.value = nuevosComentarios;
+      }
+    }, { immediate: true });
+
     onMounted(async () => {
-      await cargarComentarios();
+      // Si no hay comentarios cargados desde el padre, cargarlos
+      if (!props.mensaje.comentarios || props.mensaje.comentarios.length === 0) {
+        await cargarComentarios();
+      } else {
+        comentarios.value = props.mensaje.comentarios;
+      }
+      
       if (!usuarioActual.value) {
         usuarioActual.value = await getCurrentUser();
       }
@@ -93,6 +106,10 @@ export default {
 
     const toggleComments = async () => {
       showComments.value = !showComments.value;
+      // Si se abren los comentarios y no hay cargados, cargarlos
+      if (showComments.value && comentarios.value.length === 0) {
+        await cargarComentarios();
+      }
     };
 
     const enviarComentario = async () => {
@@ -107,6 +124,12 @@ export default {
         await agregarComentarioAGlobalChat(props.mensaje.id, nuevoComentario.value, usuarioActual.value);
         nuevoComentario.value = '';
         await cargarComentarios();
+        
+        // Emitir evento para actualizar la publicación en el feed
+        emit('comentario-enviado', {
+          publicacionId: props.mensaje.id,
+          comentarios: comentarios.value
+        });
       } catch (e) {
         errorComentario.value = 'Error al comentar.';
       } finally {
