@@ -3,14 +3,14 @@ import { getCurrentUser } from '../services/auth';
 
 // Definimos la lista de rutas de nuestra aplicación.
 const routes = [
-    { path: '/',            component: () => import('../pages/GlobalChat.vue') },
+    { path: '/',            component: () => import('../pages/GlobalChat.vue'), meta: { requiresAuth: true } },
     { path: '/chat-global', component: () => import('../pages/GlobalChat.vue'), meta: { requiresAuth: true }},
-    { path: '/ingresar',    component: () => import('../pages/Login.vue'), },
-    { path: '/registro',    component: () => import('../pages/Register.vue'), },
+    { path: '/ingresar',    component: () => import('../pages/Login.vue'), meta: { requiresAuth: false } },
+    { path: '/registro',    component: () => import('../pages/Register.vue'), meta: { requiresAuth: false } },
     { path: '/perfil',      component: () => import('../pages/Profile.vue'), meta: { requiresAuth: true }},
-    { path: '/perfil/:id',  component: () => import('../pages/ProfileFeed.vue') },
-    { path: '/terminos',    component: () => import('../pages/Terms.vue'), },
-    { path: '/privacidad',  component: () => import('../pages/Privacy.vue'), },
+    { path: '/perfil/:id',  component: () => import('../pages/ProfileFeed.vue'), meta: { requiresAuth: true } },
+    { path: '/terminos',    component: () => import('../pages/Terms.vue'), meta: { requiresAuth: false } },
+    { path: '/privacidad',  component: () => import('../pages/Privacy.vue'), meta: { requiresAuth: false } },
 ];
 
 
@@ -21,14 +21,10 @@ const router = createRouter({
 
 // Guard de navegación para proteger rutas que requieren autenticación
 router.beforeEach(async (to, from, next) => {
-    if (to.meta.requiresAuth) {
-        const user = await getCurrentUser();
-        if (!user.id) {
-            // Redirigir al login si no está autenticado
-            next('/ingresar');
-        } else {
-            next();
-        }
+    const user = await getCurrentUser();
+    // Si la ruta requiere autenticación y no hay usuario, redirige al login
+    if (to.meta.requiresAuth && (!user || !user.id)) {
+        next('/ingresar');
     } else {
         next();
     }

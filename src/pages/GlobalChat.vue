@@ -2,7 +2,7 @@
 import { nextTick, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import MainH1 from '../components/MainH1.vue';
-import { loadLastGlobalChatMessages, saveGlobalChatMessage, subscribeToGlobalChatNewMessages } from '../services/global-chat';
+import { loadLastGlobalChatMessages, saveGlobalChatMessage, subscribeToGlobalChatNewMessages, obtenerComentariosDeMensaje } from '../services/global-chat';
 import { getCurrentUser, subscribeToUserState } from '../services/auth';
 import { getUserById, getAllUsers } from '../services/users';
 import Avatar from '../components/Avatar.vue';
@@ -13,12 +13,13 @@ import BaseModal from '../components/BaseModal.vue';
 import supabase from '../services/supabase';
 import Footer from '../components/Footer.vue';
 import { uploadPublicationImage } from '../services/storage';
+import PublicationPreview from '../components/PublicationPreview.vue';
 // Heroicons
 import { HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon } from '@heroicons/vue/24/outline';
 
 export default {
   name: 'ChatGlobal',
-  components: { MainH1, Avatar, MessageItem, BaseAlert, BaseLoader, BaseModal, Footer,
+  components: { MainH1, Avatar, MessageItem, BaseAlert, BaseLoader, BaseModal, Footer, PublicationPreview,
     HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon },
   
   data() {
@@ -35,7 +36,9 @@ export default {
       cargando: true, 
       publicacionesVisibles: 10, 
       usuariosSugeridos: [], 
-      mostrarModalPublicar: false
+      mostrarModalPublicar: false,
+      mostrarVistaPreviaPublicacion: false,
+      publicacionVistaPrevia: null
     }
   },
   
@@ -115,6 +118,21 @@ export default {
     },
     async manejarNuevoMensaje(mensaje) {
       this.mensajes.unshift(mensaje);
+    },
+    abrirVistaPreviaPublicacion(publicacion) {
+      this.publicacionVistaPrevia = publicacion;
+      this.mostrarVistaPreviaPublicacion = true;
+    },
+    cerrarVistaPreviaPublicacion() {
+      this.mostrarVistaPreviaPublicacion = false;
+      this.publicacionVistaPrevia = null;
+    },
+    actualizarComentariosPublicacion(datos) {
+      // Actualizar los comentarios de la publicación en la lista local
+      const publicacionIndex = this.mensajes.findIndex(msg => msg.id === datos.publicacionId);
+      if (publicacionIndex !== -1) {
+        this.mensajes[publicacionIndex].comentarios = datos.comentarios;
+      }
     }
   },
   setup() {
@@ -144,6 +162,14 @@ export default {
       for (const msg of this.mensajes) {
         if (msg.user_id) {
           await this.obtenerUsuario(msg.user_id);
+        }
+        // Cargar comentarios para cada mensaje
+        try {
+          const comentarios = await obtenerComentariosDeMensaje(msg.id);
+          msg.comentarios = comentarios;
+        } catch (error) {
+          console.error('Error al cargar comentarios para mensaje:', msg.id, error);
+          msg.comentarios = [];
         }
       }
       await nextTick();
@@ -249,7 +275,7 @@ export default {
             <ul class="flex flex-col gap-6" aria-live="polite" aria-label="Publicaciones del feed">
               <li v-for="mensaje in mensajes.slice(0, publicacionesVisibles)" :key="mensaje.id"
                 class="bg-emerald-100 dark:bg-neutral-900 rounded-xl shadow-lg p-4 border border-emerald-200 dark:border-gray-700">
-                <MessageItem :mensaje="mensaje">
+                <MessageItem :mensaje="mensaje" @abrir-vista-previa="abrirVistaPreviaPublicacion">
                   <template #avatar>
                     <Avatar v-if="mensaje.user_id" :src="cacheUsuarios[mensaje.user_id]?.avatar_url"
                       :alt="'Avatar de ' + (cacheUsuarios[mensaje.user_id]?.username || cacheUsuarios[mensaje.user_id]?.email)"
@@ -300,5 +326,15 @@ export default {
         <Footer />
       </div>
     </aside>
+
+    <!-- Modal de vista previa de publicación -->
+    <PublicationPreview 
+      v-if="mostrarVistaPreviaPublicacion"
+      :mostrar="mostrarVistaPreviaPublicacion"
+      :publicacion="publicacionVistaPrevia"
+      :usuario="usuarioActual"
+      @cerrar="cerrarVistaPreviaPublicacion"
+      @comentario-enviado="actualizarComentariosPublicacion"
+    />
   </div>
 </template>

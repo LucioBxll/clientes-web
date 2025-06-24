@@ -80,7 +80,13 @@
                                 <span class="text-xs text-gray-500 ml-auto">{{ new Date(pub.created_at).toLocaleString() }}</span>
                             </div>
                             <div class="text-gray-900 dark:text-white">{{ pub.body }}</div>
-                            <img v-if="pub.image_url" :src="pub.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-200 dark:border-gray-600" />
+                            <img 
+                                v-if="pub.image_url" 
+                                :src="pub.image_url" 
+                                alt="Imagen de la publicación" 
+                                class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-200 dark:border-gray-600 cursor-pointer hover:opacity-90 transition-opacity" 
+                                @click="abrirVistaPreviaPublicacion(pub)"
+                            />
                             
                             <!-- Botones de acción -->
                             <div class="flex gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
@@ -167,6 +173,16 @@
                         @cancelar="cerrarModalEdicionPublicacion" 
                     />
                 </BaseModal>
+
+                <!-- Modal de vista previa de publicación -->
+                <PublicationPreview 
+                    v-if="mostrarVistaPreviaPublicacion"
+                    :mostrar="mostrarVistaPreviaPublicacion"
+                    :publicacion="publicacionVistaPrevia"
+                    :usuario="usuario"
+                    @cerrar="cerrarVistaPreviaPublicacion"
+                    @comentario-enviado="actualizarComentariosPublicacion"
+                />
             </template>
         </div>
     </div>
@@ -184,13 +200,14 @@ import BaseModal from '../components/BaseModal.vue';
 import BaseLoader from '../components/BaseLoader.vue';
 import BaseSuccess from '../components/BaseSuccess.vue';
 import BaseAlert from '../components/BaseAlert.vue';
-import { EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon, TrashIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline';
+import { EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon, TrashIcon, ChatBubbleLeftRightIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { uploadUserAvatar } from '../services/storage';
 import EditPublicationForm from '../components/EditPublicationForm.vue';
+import PublicationPreview from '../components/PublicationPreview.vue';
 
 export default {
     name: 'Perfil',
-    components: { Avatar, ProfileForm, BaseModal, BaseLoader, BaseSuccess, BaseAlert, EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon, TrashIcon, EditPublicationForm, ChatBubbleLeftRightIcon },
+    components: { Avatar, ProfileForm, BaseModal, BaseLoader, BaseSuccess, BaseAlert, EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon, TrashIcon, EditPublicationForm, ChatBubbleLeftRightIcon, XMarkIcon, PublicationPreview },
     setup() {
         const usuario = ref(null);
         const cargando = ref(true);
@@ -210,6 +227,8 @@ export default {
         const nuevosComentarios = ref({});
         const enviandoComentarios = ref({});
         const erroresComentarios = ref({});
+        const mostrarVistaPreviaPublicacion = ref(false);
+        const publicacionVistaPrevia = ref(null);
 
         onMounted(async () => {
             const inicio = Date.now();
@@ -249,6 +268,9 @@ export default {
                 const restante = 1500 - duracion;
                 setTimeout(() => { cargando.value = false; }, restante > 0 ? restante : 0);
             }
+
+            // Agregar event listener para la tecla Escape
+            document.addEventListener('keydown', manejarTeclaEscape);
         });
 
         const cambiarAvatar = (e) => {
@@ -452,6 +474,24 @@ export default {
             }
         };
 
+        const abrirVistaPreviaPublicacion = (publicacion) => {
+            publicacionVistaPrevia.value = publicacion;
+            mostrarVistaPreviaPublicacion.value = true;
+        };
+
+        const cerrarVistaPreviaPublicacion = () => {
+            mostrarVistaPreviaPublicacion.value = false;
+            publicacionVistaPrevia.value = null;
+        };
+
+        const actualizarComentariosPublicacion = (datos) => {
+            // Actualizar los comentarios de la publicación en la lista local
+            const publicacionIndex = listaPublicaciones.value.findIndex(pub => pub.id === datos.publicacionId);
+            if (publicacionIndex !== -1) {
+                listaPublicaciones.value[publicacionIndex].comentarios = datos.comentarios;
+            }
+        };
+
         // Configurar suscripciones en tiempo real
         const configurarSuscripcionesTiempoReal = () => {
             // Suscripción a nuevas publicaciones
@@ -555,7 +595,16 @@ export default {
             if (limpiarSuscripciones) {
                 limpiarSuscripciones();
             }
+            // Remover event listener de teclado
+            document.removeEventListener('keydown', manejarTeclaEscape);
         });
+
+        // Función para manejar la tecla Escape
+        const manejarTeclaEscape = (event) => {
+            if (event.key === 'Escape' && mostrarVistaPreviaPublicacion.value) {
+                cerrarVistaPreviaPublicacion();
+            }
+        };
 
         return {
             usuario,
@@ -588,7 +637,12 @@ export default {
             nuevosComentarios,
             enviandoComentarios,
             erroresComentarios,
-            enviarComentario
+            enviarComentario,
+            mostrarVistaPreviaPublicacion,
+            publicacionVistaPrevia,
+            abrirVistaPreviaPublicacion,
+            cerrarVistaPreviaPublicacion,
+            actualizarComentariosPublicacion
         };
     }
 };

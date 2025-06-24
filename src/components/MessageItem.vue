@@ -12,7 +12,13 @@
         </router-link>
       </header>
       <p class="text-gray-900 dark:text-white break-words">{{ mensaje.body }}</p>
-      <img v-if="mensaje.image_url" :src="mensaje.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-emerald-200 dark:border-gray-700" />
+      <img 
+        v-if="mensaje.image_url" 
+        :src="mensaje.image_url" 
+        alt="Imagen de la publicación" 
+        class="my-2 rounded-lg max-h-64 w-auto object-cover border border-emerald-200 dark:border-gray-700 cursor-pointer hover:opacity-90 transition-opacity" 
+        @click="abrirVistaPrevia"
+      />
       <footer class="flex items-center gap-4 mt-2">
         <time class="text-xs md:text-sm text-gray-500 dark:text-gray-400" :datetime="mensaje.created_at">
           {{ new Date(mensaje.created_at).toLocaleString() }}
@@ -57,7 +63,8 @@ export default {
   props: {
     mensaje: Object
   },
-  setup(props) {
+  emits: ['abrir-vista-previa'],
+  setup(props, { emit }) {
     const showComments = ref(false);
     const comentarios = ref([]);
     const nuevoComentario = ref('');
@@ -107,6 +114,10 @@ export default {
       }
     };
 
+    const abrirVistaPrevia = () => {
+      emit('abrir-vista-previa', props.mensaje);
+    };
+
     return {
       showComments,
       comentarios,
@@ -116,7 +127,8 @@ export default {
       usuarioActual,
       errorComentario,
       toggleComments,
-      enviarComentario
+      enviarComentario,
+      abrirVistaPrevia
     };
   }
 };
