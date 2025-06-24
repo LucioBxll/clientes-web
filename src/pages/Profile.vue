@@ -81,32 +81,116 @@
                             </div>
                             <div class="text-gray-900 dark:text-white">{{ pub.body }}</div>
                             <img v-if="pub.image_url" :src="pub.image_url" alt="Imagen de la publicación" class="my-2 rounded-lg max-h-64 w-auto object-cover border border-gray-200 dark:border-gray-600" />
+                            
+                            <!-- Botones de acción -->
+                            <div class="flex gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                <button 
+                                    @click="editarPublicacion(pub)"
+                                    class="flex items-center gap-1 px-3 py-1.5 text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors"
+                                >
+                                    <PencilSquareIcon class="w-4 h-4" />
+                                    Editar
+                                </button>
+                                <button 
+                                    @click="eliminarPublicacion(pub.id)"
+                                    class="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+                                >
+                                    <TrashIcon class="w-4 h-4" />
+                                    Eliminar
+                                </button>
+                                <button 
+                                    @click="toggleComentarios(pub.id)"
+                                    class="ml-auto p-2 rounded-full text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors flex items-center gap-1"
+                                    :aria-label="publicacionesConComentarios[pub.id] ? 'Ocultar comentarios' : 'Ver comentarios'"
+                                >
+                                    <ChatBubbleLeftRightIcon class="w-5 h-5" />
+                                    <span class="text-xs text-gray-600 dark:text-gray-300 min-w-[1.5em] text-center">{{ pub.comentarios?.length || 0 }}</span>
+                                </button>
+                            </div>
+
+                            <!-- Sección de comentarios -->
+                            <div v-if="publicacionesConComentarios[pub.id]" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                <div v-if="cargandoComentarios[pub.id]" class="text-sm text-gray-500 dark:text-gray-400">
+                                    Cargando comentarios...
+                                </div>
+                                <div v-else>
+                                    <div v-if="!pub.comentarios || pub.comentarios.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+                                        No hay comentarios aún.
+                                    </div>
+                                    <ul v-else class="space-y-2 mb-2">
+                                        <li v-for="comentario in pub.comentarios" :key="comentario.id" class="flex items-start gap-2 bg-white dark:bg-neutral-800 rounded-lg p-2">
+                                            <Avatar 
+                                                :src="comentario.avatar_url" 
+                                                :alt="'Avatar de ' + comentario.username" 
+                                                :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" 
+                                                img-class="h-6 w-6 rounded-full object-cover border border-emerald-400" 
+                                            />
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-semibold text-xs text-emerald-700 dark:text-emerald-400">{{ comentario.username }}</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ new Date(comentario.created_at).toLocaleString() }}</span>
+                                                </div>
+                                                <div class="text-sm text-gray-900 dark:text-white">{{ comentario.body }}</div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Formulario para comentar -->
+                                <form v-if="usuario" @submit.prevent="enviarComentario(pub.id)" class="flex items-end gap-2 mt-2">
+                                    <input 
+                                        v-model="nuevosComentarios[pub.id]" 
+                                        type="text" 
+                                        placeholder="Escribe un comentario..." 
+                                        class="flex-1 p-2 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" 
+                                        :disabled="enviandoComentarios[pub.id]" 
+                                    />
+                                    <button 
+                                        type="submit" 
+                                        class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-sm rounded-lg disabled:opacity-50 transition-colors" 
+                                        :disabled="enviandoComentarios[pub.id] || !nuevosComentarios[pub.id]?.trim()"
+                                    >
+                                        Comentar
+                                    </button>
+                                </form>
+                                <div v-if="erroresComentarios[pub.id]" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ erroresComentarios[pub.id] }}</div>
+                            </div>
                         </li>
                     </ul>
                 </div>
+
+                <!-- Modal de edición de publicación -->
+                <BaseModal v-if="mostrarModalEdicionPublicacion" @close="cerrarModalEdicionPublicacion">
+                    <EditPublicationForm 
+                        :publicacion="publicacionSeleccionada" 
+                        @guardar="guardarCambiosPublicacion" 
+                        @cancelar="cerrarModalEdicionPublicacion" 
+                    />
+                </BaseModal>
             </template>
         </div>
     </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { getCurrentUser, logout } from '../services/auth';
 import Avatar from '../components/Avatar.vue';
 import supabase from '../services/supabase';
 import { upsertUser } from '../services/users';
-import { loadLastGlobalChatMessages, updateUsernameInMessages } from '../services/global-chat';
+import { loadLastGlobalChatMessages, updateUsernameInMessages, updateMessage, deleteMessage, obtenerComentariosDeMensaje, agregarComentarioAGlobalChat, subscribeToGlobalChatNewMessages } from '../services/global-chat';
 import ProfileForm from '../components/ProfileForm.vue';
 import BaseModal from '../components/BaseModal.vue';
 import BaseLoader from '../components/BaseLoader.vue';
 import BaseSuccess from '../components/BaseSuccess.vue';
 import BaseAlert from '../components/BaseAlert.vue';
-import { EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline';
+import { EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon, TrashIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline';
 import { uploadUserAvatar } from '../services/storage';
+import EditPublicationForm from '../components/EditPublicationForm.vue';
 
 export default {
     name: 'Perfil',
-    components: { Avatar, ProfileForm, BaseModal, BaseLoader, BaseSuccess, BaseAlert, EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon },
+    components: { Avatar, ProfileForm, BaseModal, BaseLoader, BaseSuccess, BaseAlert, EnvelopeIcon, PencilSquareIcon, ArrowRightOnRectangleIcon, TrashIcon, EditPublicationForm, ChatBubbleLeftRightIcon },
     setup() {
         const usuario = ref(null);
         const cargando = ref(true);
@@ -119,6 +203,13 @@ export default {
         const listaPublicaciones = ref([]);
         const mostrarModalEdicion = ref(false);
         const datosEdicion = ref({ nombreUsuario: '', descripcion: '', email: '' });
+        const mostrarModalEdicionPublicacion = ref(false);
+        const publicacionSeleccionada = ref(null);
+        const publicacionesConComentarios = ref({});
+        const cargandoComentarios = ref({});
+        const nuevosComentarios = ref({});
+        const enviandoComentarios = ref({});
+        const erroresComentarios = ref({});
 
         onMounted(async () => {
             const inicio = Date.now();
@@ -127,6 +218,21 @@ export default {
                 // Traer mensajes del chat global de este usuario
                 const todosMensajes = await loadLastGlobalChatMessages();
                 listaPublicaciones.value = todosMensajes.filter(msg => msg.user_id === usuario.value.id);
+                
+                // Cargar el conteo de comentarios para cada publicación
+                for (const pub of listaPublicaciones.value) {
+                    try {
+                        const comentarios = await obtenerComentariosDeMensaje(pub.id);
+                        pub.comentarios = comentarios;
+                    } catch (error) {
+                        console.error('Error al cargar comentarios para publicación:', pub.id, error);
+                        pub.comentarios = [];
+                    }
+                }
+                
+                // Configurar suscripciones en tiempo real
+                limpiarSuscripciones = configurarSuscripcionesTiempoReal();
+                
                 // Inicializar descripción si existe
                 if (usuario.value) {
                     datosEdicion.value = {
@@ -244,6 +350,213 @@ export default {
             }
         };
 
+        const editarPublicacion = (pub) => {
+            publicacionSeleccionada.value = pub;
+            mostrarModalEdicionPublicacion.value = true;
+        };
+
+        const cerrarModalEdicionPublicacion = () => {
+            mostrarModalEdicionPublicacion.value = false;
+        };
+
+        const guardarCambiosPublicacion = async (datos) => {
+            try {
+                mensajeError.value = '';
+                mensajeSuccess.value = '';
+                
+                // Actualizar la publicación usando el servicio
+                await updateMessage(datos.id, datos.body, datos.image_url);
+                
+                // Actualizar la lista de publicaciones
+                const publicacionIndex = listaPublicaciones.value.findIndex(pub => pub.id === datos.id);
+                if (publicacionIndex !== -1) {
+                    listaPublicaciones.value[publicacionIndex] = {
+                        ...listaPublicaciones.value[publicacionIndex],
+                        body: datos.body,
+                        image_url: datos.image_url
+                    };
+                }
+                
+                cerrarModalEdicionPublicacion();
+                mensajeSuccess.value = '¡Publicación actualizada correctamente!';
+                setTimeout(() => { mensajeSuccess.value = ''; }, 4000);
+            } catch (error) {
+                console.error('Error al actualizar la publicación:', error);
+                mensajeError.value = 'Error al actualizar la publicación';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
+            }
+        };
+
+        const eliminarPublicacion = async (id) => {
+            if (!confirm('¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            try {
+                mensajeError.value = '';
+                mensajeSuccess.value = '';
+                
+                // Eliminar la publicación usando el servicio
+                await deleteMessage(id);
+                
+                // Remover de la lista local
+                listaPublicaciones.value = listaPublicaciones.value.filter(pub => pub.id !== id);
+                
+                mensajeSuccess.value = '¡Publicación eliminada correctamente!';
+                setTimeout(() => { mensajeSuccess.value = ''; }, 4000);
+            } catch (error) {
+                console.error('Error al eliminar la publicación:', error);
+                mensajeError.value = 'Error al eliminar la publicación';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
+            }
+        };
+
+        const toggleComentarios = async (pubId) => {
+            // Si ya están visibles, ocultarlos
+            if (publicacionesConComentarios.value[pubId]) {
+                publicacionesConComentarios.value[pubId] = false;
+                return;
+            }
+
+            // Los comentarios ya están cargados, solo mostrarlos
+            publicacionesConComentarios.value[pubId] = true;
+        };
+
+        const enviarComentario = async (pubId) => {
+            if (!usuario.value || !pubId) return;
+
+            try {
+                enviandoComentarios.value[pubId] = true;
+                mensajeError.value = '';
+                mensajeSuccess.value = '';
+                
+                const comentario = nuevosComentarios.value[pubId];
+                if (!comentario || !comentario.trim()) {
+                    throw new Error('El comentario no puede estar vacío');
+                }
+                
+                // Agregar el comentario usando el servicio
+                await agregarComentarioAGlobalChat(pubId, comentario, usuario.value);
+                
+                // Limpiar el formulario
+                nuevosComentarios.value[pubId] = '';
+                
+                mensajeSuccess.value = '¡Comentario enviado correctamente!';
+                setTimeout(() => { mensajeSuccess.value = ''; }, 4000);
+            } catch (error) {
+                console.error('Error al enviar el comentario:', error);
+                mensajeError.value = 'Error al enviar el comentario';
+                setTimeout(() => { mensajeError.value = ''; }, 4000);
+            } finally {
+                enviandoComentarios.value[pubId] = false;
+            }
+        };
+
+        // Configurar suscripciones en tiempo real
+        const configurarSuscripcionesTiempoReal = () => {
+            // Suscripción a nuevas publicaciones
+            const publicacionesChannel = supabase.channel('publicaciones-perfil', {
+                config: {
+                    broadcast: { self: true },
+                },
+            });
+
+            // Escuchar cambios en publicaciones (INSERT, UPDATE, DELETE)
+            publicacionesChannel.on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'global_chat',
+                    filter: `user_id=eq.${usuario.value?.id}`
+                },
+                async (payload) => {
+                    console.log('Cambio en publicación detectado:', payload);
+                    
+                    if (payload.eventType === 'INSERT') {
+                        // Nueva publicación del usuario
+                        const nuevaPublicacion = payload.new;
+                        nuevaPublicacion.comentarios = [];
+                        listaPublicaciones.value.unshift(nuevaPublicacion);
+                    } else if (payload.eventType === 'UPDATE') {
+                        // Publicación actualizada
+                        const publicacionIndex = listaPublicaciones.value.findIndex(pub => pub.id === payload.new.id);
+                        if (publicacionIndex !== -1) {
+                            listaPublicaciones.value[publicacionIndex] = {
+                                ...listaPublicaciones.value[publicacionIndex],
+                                ...payload.new
+                            };
+                        }
+                    } else if (payload.eventType === 'DELETE') {
+                        // Publicación eliminada
+                        listaPublicaciones.value = listaPublicaciones.value.filter(pub => pub.id !== payload.old.id);
+                    }
+                }
+            );
+
+            // Suscripción a comentarios
+            const comentariosChannel = supabase.channel('comentarios-perfil', {
+                config: {
+                    broadcast: { self: true },
+                },
+            });
+
+            // Escuchar cambios en comentarios
+            comentariosChannel.on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'global_chat_comments'
+                },
+                async (payload) => {
+                    console.log('Cambio en comentario detectado:', payload);
+                    
+                    // Encontrar la publicación afectada
+                    const publicacionIndex = listaPublicaciones.value.findIndex(pub => pub.id === payload.new?.mensaje_id || payload.old?.mensaje_id);
+                    
+                    if (publicacionIndex !== -1) {
+                        if (payload.eventType === 'INSERT') {
+                            // Nuevo comentario
+                            const nuevoComentario = payload.new;
+                            if (!listaPublicaciones.value[publicacionIndex].comentarios) {
+                                listaPublicaciones.value[publicacionIndex].comentarios = [];
+                            }
+                            listaPublicaciones.value[publicacionIndex].comentarios.push(nuevoComentario);
+                        } else if (payload.eventType === 'UPDATE') {
+                            // Comentario actualizado
+                            const comentarioIndex = listaPublicaciones.value[publicacionIndex].comentarios?.findIndex(com => com.id === payload.new.id);
+                            if (comentarioIndex !== -1) {
+                                listaPublicaciones.value[publicacionIndex].comentarios[comentarioIndex] = payload.new;
+                            }
+                        } else if (payload.eventType === 'DELETE') {
+                            // Comentario eliminado
+                            listaPublicaciones.value[publicacionIndex].comentarios = listaPublicaciones.value[publicacionIndex].comentarios?.filter(com => com.id !== payload.old.id) || [];
+                        }
+                    }
+                }
+            );
+
+            // Suscribirse a los canales
+            publicacionesChannel.subscribe();
+            comentariosChannel.subscribe();
+
+            // Retornar función para limpiar suscripciones
+            return () => {
+                publicacionesChannel.unsubscribe();
+                comentariosChannel.unsubscribe();
+            };
+        };
+
+        let limpiarSuscripciones = null;
+
+        // Limpiar suscripciones cuando el componente se desmonte
+        onUnmounted(() => {
+            if (limpiarSuscripciones) {
+                limpiarSuscripciones();
+            }
+        });
+
         return {
             usuario,
             cargando,
@@ -262,7 +575,20 @@ export default {
             abrirModalEdicion,
             cerrarModalEdicion,
             guardarCambiosUsuario,
-            handleLogout
+            handleLogout,
+            mostrarModalEdicionPublicacion,
+            publicacionSeleccionada,
+            editarPublicacion,
+            cerrarModalEdicionPublicacion,
+            guardarCambiosPublicacion,
+            eliminarPublicacion,
+            publicacionesConComentarios,
+            cargandoComentarios,
+            toggleComentarios,
+            nuevosComentarios,
+            enviandoComentarios,
+            erroresComentarios,
+            enviarComentario
         };
     }
 };

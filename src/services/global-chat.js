@@ -106,19 +106,24 @@ export async function subscribeToGlobalChatNewMessages(callback) {
     }
 }
 
-export async function updateMessage(messageId, newBody) {
+export async function updateMessage(messageId, newBody, newImageUrl = null) {
     try {
         const currentUser = await getCurrentUser();
         if (!currentUser.id) {
             throw new Error('Usuario no autenticado');
         }
 
+        const updateData = { body: newBody };
+        if (newImageUrl !== undefined) {
+            updateData.image_url = newImageUrl;
+        }
+
         const { data, error } = await supabase
             .from('global_chat')
-            .update({ body: newBody })
+            .update(updateData)
             .eq('id', messageId)
             .eq('user_id', currentUser.id)
-            .select('id, username, body, created_at, user_id')
+            .select('id, username, body, created_at, user_id, image_url')
             .single();
 
         if(error) {
