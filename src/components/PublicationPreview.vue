@@ -1,37 +1,114 @@
 <template>
   <div v-if="mostrar" 
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+       class="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-75 p-0 sm:p-4 overflow-hidden"
        @click="cerrarVistaPrevia">
-    <div class="relative bg-white dark:bg-neutral-900 rounded-lg max-w-6xl max-h-[90vh] w-full overflow-hidden shadow-2xl" @click.stop>
+    <div class="relative bg-white dark:bg-neutral-900 rounded-lg w-full h-[100dvh] min-h-0 sm:max-w-6xl sm:max-h-[90vh] sm:w-auto sm:h-auto overflow-hidden shadow-2xl flex flex-col sm:flex-row" @click.stop>
       <!-- Botón de cerrar -->
       <button 
         @click="cerrarVistaPrevia"
-        class="absolute top-4 right-4 z-10 bg-black bg-opacity-50 hover:bg-opacity-75 text-white rounded-full p-2 transition-colors"
+        class="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 bg-black bg-opacity-70 hover:bg-opacity-90 text-white rounded-full p-2.5 sm:p-2 transition-colors shadow-lg"
+        aria-label="Cerrar vista previa"
       >
         <XMarkIcon class="w-6 h-6" />
       </button>
 
-      <!-- Contenido de la publicación -->
-      <div class="flex h-full">
+      <!-- MOBILE: Layout tipo Instagram -->
+      <div class="flex-1 flex flex-col min-h-0 sm:hidden">
+        <!-- Imagen arriba -->
+        <div class="w-full flex-shrink-0 bg-gray-100 dark:bg-neutral-800 flex items-center justify-center" style="max-height:40vh; min-height:120px;">
+          <img 
+            v-if="publicacion.image_url" 
+            :src="publicacion.image_url" 
+            alt="Imagen de la publicación" 
+            class="max-h-[40vh] w-auto max-w-full object-contain rounded-b-none rounded-t-lg"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center">
+            <span class="text-gray-500 dark:text-gray-400 text-lg">Sin imagen</span>
+          </div>
+        </div>
+        <!-- Usuario y texto -->
+        <div class="px-4 pt-3 pb-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-neutral-900 flex-shrink-0">
+          <div class="flex items-center gap-3 mb-2">
+            <Avatar 
+              :src="publicacion.avatar_url || usuario?.avatar_url" 
+              :alt="'Avatar de ' + (publicacion.username || usuario?.username)" 
+              :fallback-initial="(publicacion.username || usuario?.username)?.charAt(0)?.toUpperCase() || '?'" 
+              img-class="h-9 w-9 rounded-full object-cover border-2 border-emerald-400" 
+            />
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-emerald-700 dark:text-emerald-400 text-base truncate">
+                {{ publicacion.username || usuario?.username }}
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                {{ new Date(publicacion.created_at).toLocaleString() }}
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-900 dark:text-white text-sm leading-relaxed whitespace-pre-line">
+            {{ publicacion.body }}
+          </p>
+        </div>
+        <!-- Comentarios y formulario -->
+        <div class="flex-1 min-h-0 flex flex-col bg-white dark:bg-neutral-900">
+          <!-- Lista de comentarios con scroll -->
+          <div class="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+            <ul class="space-y-3">
+              <li v-for="comentario in comentarios" :key="comentario.id" class="flex items-start gap-2">
+                <Avatar :src="comentario.avatar_url" :alt="'Avatar de ' + comentario.username" :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" img-class="h-7 w-7 rounded-full object-cover border-2 border-emerald-400 flex-shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span class="font-semibold text-xs text-emerald-700 dark:text-emerald-400">{{ comentario.username }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ new Date(comentario.created_at).toLocaleString() }}</span>
+                  </div>
+                  <div class="text-xs text-gray-900 dark:text-white break-words">{{ comentario.body }}</div>
+                </div>
+              </li>
+            </ul>
+            <div v-if="cargandoComentarios" class="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">Cargando comentarios...</div>
+          </div>
+          <!-- Formulario fijo abajo -->
+          <div class="p-3 border-t border-gray-300 dark:border-gray-800 bg-white/95 dark:bg-neutral-900/95 flex-shrink-0 backdrop-blur-md">
+            <form v-if="usuarioActual" @submit.prevent="enviarComentario" class="flex items-end gap-2">
+              <input 
+                v-model="nuevoComentario" 
+                type="text" 
+                placeholder="Escribe un comentario..." 
+                class="flex-1 p-2 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" 
+                :disabled="enviandoComentario" 
+              />
+              <button 
+                type="submit" 
+                class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-sm rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap" 
+                :disabled="enviandoComentario || !nuevoComentario.trim()"
+              >
+                {{ enviandoComentario ? 'Enviando...' : 'Comentar' }}
+              </button>
+            </form>
+            <div v-if="errorComentario" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ errorComentario }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESKTOP: Mantener dos columnas -->
+      <div class="hidden sm:flex flex-1 h-full">
         <!-- Columna izquierda: Imagen -->
-        <div class="flex-1 bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
-          <div class="flex-1 flex items-center justify-center w-full h-full">
+        <div class="flex-1 bg-gray-100 dark:bg-neutral-800 flex items-center justify-center min-h-[200px] sm:min-h-0 flex-shrink-0">
+          <div class="flex-1 flex items-center justify-center w-full h-full p-4">
             <img 
               v-if="publicacion.image_url" 
               :src="publicacion.image_url" 
               alt="Imagen de la publicación" 
-              class="max-w-full max-h-full object-contain p-4"
+              class="max-w-full max-h-full object-contain rounded-lg"
             />
             <div v-else class="w-full h-full flex items-center justify-center">
               <span class="text-gray-500 dark:text-gray-400 text-lg">Sin imagen</span>
             </div>
           </div>
         </div>
-
         <!-- Columna derecha: Información y comentarios -->
-        <div class="w-96 bg-white dark:bg-neutral-900 flex flex-col">
+        <div class="w-96 bg-white dark:bg-neutral-900 flex flex-col flex-shrink-0 min-h-0">
           <!-- Header con información del usuario -->
-          <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
             <div class="flex items-center gap-3 mb-4">
               <Avatar 
                 :src="publicacion.avatar_url || usuario?.avatar_url" 
@@ -39,8 +116,8 @@
                 :fallback-initial="(publicacion.username || usuario?.username)?.charAt(0)?.toUpperCase() || '?'" 
                 img-class="h-12 w-12 rounded-full object-cover border-2 border-emerald-400" 
               />
-              <div class="flex-1">
-                <div class="font-semibold text-emerald-700 dark:text-emerald-400 text-lg">
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-emerald-700 dark:text-emerald-400 text-lg truncate">
                   {{ publicacion.username || usuario?.username }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -48,17 +125,13 @@
                 </div>
               </div>
             </div>
-
-            <!-- Contenido de la publicación -->
             <div class="mb-4">
               <p class="text-gray-900 dark:text-white text-base leading-relaxed whitespace-pre-line">
                 {{ publicacion.body }}
               </p>
             </div>
-
-            <!-- Footer con botón de comentarios -->
             <footer class="flex items-center gap-4 mt-4">
-              <time class="text-xs md:text-sm text-gray-500 dark:text-gray-400" :datetime="publicacion.created_at">
+              <time class="text-xs text-gray-500 dark:text-gray-400" :datetime="publicacion.created_at">
                 {{ new Date(publicacion.created_at).toLocaleString() }}
               </time>
               <button @click="toggleComments" class="ml-auto p-2 rounded-full text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors flex items-center gap-1" :aria-label="showComments ? 'Ocultar comentarios' : 'Comentar'">
@@ -67,24 +140,39 @@
               </button>
             </footer>
           </div>
-
-          <!-- Sección de comentarios expandible -->
-          <div v-if="showComments" class="flex-1 flex flex-col border-t border-gray-200 dark:border-gray-700">
-            <div class="p-4">
-              <div v-if="cargandoComentarios" class="text-xs text-gray-500 dark:text-gray-400">Cargando comentarios...</div>
-              <ul v-else class="space-y-2 mb-2">
+          <!-- Comentarios y formulario -->
+          <div v-if="showComments" class="flex-1 flex flex-col border-t border-gray-200 dark:border-gray-700 min-h-0">
+            <div class="flex-1 overflow-y-auto p-4">
+              <ul class="space-y-3">
                 <li v-for="comentario in comentarios" :key="comentario.id" class="flex items-start gap-2">
-                  <Avatar :src="comentario.avatar_url" :alt="'Avatar de ' + comentario.username" :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" img-class="h-7 w-7 rounded-full object-cover border-2 border-emerald-400" />
-                  <div>
-                    <span class="font-semibold text-xs text-emerald-700 dark:text-emerald-400">{{ comentario.username }}</span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">{{ new Date(comentario.created_at).toLocaleString() }}</span>
-                    <div class="text-xs text-gray-900 dark:text-white">{{ comentario.body }}</div>
+                  <Avatar :src="comentario.avatar_url" :alt="'Avatar de ' + comentario.username" :fallback-initial="comentario.username?.charAt(0)?.toUpperCase() || '?'" img-class="h-7 w-7 rounded-full object-cover border-2 border-emerald-400 flex-shrink-0" />
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                      <span class="font-semibold text-xs text-emerald-700 dark:text-emerald-400">{{ comentario.username }}</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">{{ new Date(comentario.created_at).toLocaleString() }}</span>
+                    </div>
+                    <div class="text-xs text-gray-900 dark:text-white break-words">{{ comentario.body }}</div>
                   </div>
                 </li>
               </ul>
-              <form v-if="usuarioActual" @submit.prevent="enviarComentario" class="flex items-end gap-2 mt-2">
-                <input v-model="nuevoComentario" type="text" placeholder="Escribe un comentario..." class="flex-1 p-2 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" :disabled="enviandoComentario" />
-                <button type="submit" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-sm rounded-lg disabled:opacity-50 transition-colors" :disabled="enviandoComentario || !nuevoComentario.trim()">Comentar</button>
+              <div v-if="cargandoComentarios" class="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">Cargando comentarios...</div>
+            </div>
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-neutral-900 flex-shrink-0">
+              <form v-if="usuarioActual" @submit.prevent="enviarComentario" class="flex items-end gap-2">
+                <input 
+                  v-model="nuevoComentario" 
+                  type="text" 
+                  placeholder="Escribe un comentario..." 
+                  class="flex-1 p-2 rounded-lg border border-emerald-200 dark:border-gray-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" 
+                  :disabled="enviandoComentario" 
+                />
+                <button 
+                  type="submit" 
+                  class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-sm rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap" 
+                  :disabled="enviandoComentario || !nuevoComentario.trim()"
+                >
+                  {{ enviandoComentario ? 'Enviando...' : 'Comentar' }}
+                </button>
               </form>
               <div v-if="errorComentario" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ errorComentario }}</div>
             </div>
