@@ -217,20 +217,22 @@ const sendMessage = async () => {
       messageText.value
     );
 
-    // Agregar el mensaje a la lista localmente
-    messages.value.push({
-      ...message,
-      sender: {
-        id: currentUser.value.id,
-        username: currentUser.value.username,
-        avatar_url: currentUser.value.avatar_url
-      }
-    });
+    // NO agregar el mensaje localmente - llegará a través de Realtime
+    // messages.value.push({
+    //   ...message,
+    //   sender: {
+    //     id: currentUser.value.id,
+    //     username: currentUser.value.username,
+    //     avatar_url: currentUser.value.avatar_url
+    //   }
+    // });
 
     messageText.value = '';
     
-    // Scroll al final
-    await forceScrollToBottom();
+    // Scroll al final después de un breve delay para que llegue el mensaje por Realtime
+    setTimeout(async () => {
+      await forceScrollToBottom();
+    }, 100);
   } catch (error) {
     console.error('Error al enviar mensaje:', error);
     alert('Error al enviar el mensaje. Por favor, intenta nuevamente.');
@@ -246,28 +248,25 @@ const setupRealtimeSubscription = () => {
     currentUser.value.id,
     targetUserId.value,
     async (newMessage) => {
-      // Solo agregar si no es nuestro propio mensaje (ya se agregó localmente)
-      if (newMessage.sender_id !== currentUser.value.id) {
-        // Obtener datos del remitente
-        try {
-          const sender = await getUserById(newMessage.sender_id);
-          messages.value.push({
-            ...newMessage,
-            sender: {
-              id: sender.id,
-              username: sender.username,
-              avatar_url: sender.avatar_url
-            }
-          });
-          
-          // Marcar el mensaje como leído inmediatamente
+      // Evitar duplicados por id
+      if (messages.value.some(m => m.id === newMessage.id)) return;
+      try {
+        const sender = await getUserById(newMessage.sender_id);
+        messages.value.push({
+          ...newMessage,
+          sender: {
+            id: sender.id,
+            username: sender.username,
+            avatar_url: sender.avatar_url
+          }
+        });
+        // Marcar como leído si no es nuestro mensaje
+        if (newMessage.sender_id !== currentUser.value.id) {
           await markMessagesAsRead();
-          
-          // Scroll automático si está cerca del final
-          await autoScrollIfNearBottom();
-        } catch (error) {
-          console.error('Error al obtener datos del remitente:', error);
         }
+        await autoScrollIfNearBottom();
+      } catch (error) {
+        console.error('Error al procesar mensaje recibido:', error);
       }
     }
   );
