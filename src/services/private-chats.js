@@ -255,4 +255,153 @@ export function clearChatCache() {
     } catch (error) {
         console.error('Error al limpiar cache de chats:', error);
     }
+}
+
+/**
+ * Obtiene todos los chats privados de un usuario
+ */
+export async function getUserPrivateChats(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('private_chats')
+            .select(`
+                *,
+                user1:users!private_chats_user1_id_fkey(
+                    id,
+                    username,
+                    avatar_url,
+                    status
+                ),
+                user2:users!private_chats_user2_id_fkey(
+                    id,
+                    username,
+                    avatar_url,
+                    status
+                )
+            `)
+            .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
+            .order('updated_at', { ascending: false });
+
+        if (error) {
+            throw error;
+        }
+
+        // Procesar los datos para obtener el otro usuario y el último mensaje recibido
+        const chatsWithLastMessage = await Promise.all(
+            data.map(async (chat) => {
+                const otherUser = chat.user1_id === userId ? chat.user2 : chat.user1;
+                
+                // Obtener el último mensaje del chat (enviado o recibido)
+                const { data: lastMessageData, error: lastMessageError } = await supabase
+                    .from('private_messages')
+                    .select(`
+                        id,
+                        body,
+                        created_at,
+                        sender_id,
+                        receiver_id
+                    `)
+                    .eq('chat_id', chat.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                let lastMessage = null;
+                if (!lastMessageError && lastMessageData) {
+                    lastMessage = lastMessageData;
+                }
+
+                // Obtener el conteo de mensajes no leídos
+                const { count: unreadCount, error: unreadError } = await supabase
+                    .from('private_messages')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('chat_id', chat.id)
+                    .eq('receiver_id', userId)
+                    .is('read_at', null);
+
+                return {
+                    id: chat.id,
+                    otherUser: otherUser,
+                    lastMessage: lastMessage,
+                    unreadCount: unreadCount || 0,
+                    updatedAt: chat.updated_at,
+                    createdAt: chat.created_at
+                };
+            })
+        );
+
+        return chatsWithLastMessage;
+    } catch (error) {
+        console.error('Error al obtener chats del usuario:', error);
+        return [];
+    }
+}
+
+/**
+ * Obtiene el número de mensajes no leídos en un chat
+ */
+export async function getUnreadMessageCount(chatId, userId) {
+    try {
+        const { count, error } = await supabase
+            .from('private_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('chat_id', chatId)
+            .eq('receiver_id', userId)
+            .is('read_at', null);
+
+        if (error) {
+            throw error;
+        }
+
+        return count || 0;
+    } catch (error) {
+        console.error('Error al obtener mensajes no leídos:', error);
+        return 0;
+    }
+}
+
+/**
+ * Marca mensajes como leídos
+ */
+export async function markMessagesAsRead(chatId, userId) {
+    try {
+        const { error } = await supabase
+            .from('private_messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('chat_id', chatId)
+            .eq('receiver_id', userId)
+            .is('read_at', null);
+
+        if (error) {
+            throw error;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error al marcar mensajes como leídos:', error);
+        return false;
+    }
+}
+
+/**
+ * Marca todos los mensajes de un chat como leídos
+ */
+export async function markChatAsRead(chatId, userId) {
+    try {
+        const { error } = await supabase
+            .from('private_messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('chat_id', chatId)
+            .eq('receiver_id', userId)
+            .is('read_at', null);
+
+        if (error) {
+            throw error;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error al marcar mensajes como leídos:', error);
+        return false;
+    }
 } 

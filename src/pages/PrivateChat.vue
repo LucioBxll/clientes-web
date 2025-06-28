@@ -1,34 +1,35 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-white dark:bg-neutral-950">
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b">
+    <div class="bg-white dark:bg-neutral-950 shadow-sm border-b border-emerald-200 dark:border-gray-700">
       <div class="max-w-4xl mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <button 
               @click="$router.go(-1)"
-              class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              class="p-2 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors text-emerald-700 dark:text-emerald-400"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
               </svg>
             </button>
             <div v-if="targetUser" class="flex items-center space-x-3">
-              <img 
-                :src="targetUser.avatar_url || '/default-avatar.png'" 
+              <Avatar 
+                :src="targetUser.avatar_url" 
                 :alt="targetUser.username"
-                class="w-10 h-10 rounded-full object-cover"
+                :fallback-initial="targetUser.username?.charAt(0)?.toUpperCase() || '?'"
+                img-class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400"
               />
               <div>
-                <h1 class="text-lg font-semibold text-gray-900">{{ targetUser.username }}</h1>
-                <p class="text-sm text-gray-500">Chat privado</p>
+                <h1 class="text-lg font-semibold text-emerald-800 dark:text-white">{{ targetUser.username }}</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Chat privado</p>
               </div>
             </div>
             <div v-else class="flex items-center space-x-3">
-              <div class="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+              <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
               <div>
-                <div class="h-5 bg-gray-200 rounded w-24 animate-pulse"></div>
-                <div class="h-4 bg-gray-200 rounded w-16 mt-1 animate-pulse"></div>
+                <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 mt-1 animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -38,7 +39,7 @@
 
     <!-- Chat Container -->
     <div class="max-w-4xl mx-auto px-4 py-6">
-      <div class="bg-white rounded-lg shadow-sm border h-[600px] flex flex-col">
+      <div class="bg-white dark:bg-neutral-950 rounded-lg shadow-sm border border-emerald-200 dark:border-gray-700 h-[600px] flex flex-col">
         
         <!-- Messages Area -->
         <div 
@@ -49,69 +50,44 @@
           <!-- Loading State -->
           <div v-if="loading && messages.length === 0" class="flex items-center justify-center h-full">
             <div class="text-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-              <p class="text-gray-500 mt-2">Cargando mensajes...</p>
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mx-auto"></div>
+              <p class="text-gray-500 dark:text-gray-400 mt-2">Cargando mensajes...</p>
             </div>
           </div>
 
           <!-- Empty State -->
           <div v-else-if="!loading && messages.length === 0" class="flex items-center justify-center h-full">
             <div class="text-center">
-              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
               </div>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No hay mensajes aún</h3>
-              <p class="text-gray-500">¡Inicia la conversación enviando un mensaje!</p>
+              <h3 class="text-lg font-medium text-emerald-800 dark:text-white mb-2">No hay mensajes aún</h3>
+              <p class="text-gray-500 dark:text-gray-400">¡Inicia la conversación enviando un mensaje!</p>
             </div>
           </div>
 
           <!-- Messages -->
           <div v-else class="space-y-4">
-            <div 
+            <PrivateMessageItem
               v-for="message in messages" 
               :key="message.id"
-              class="flex"
-              :class="message.sender_id === currentUser?.id ? 'justify-end' : 'justify-start'"
-            >
-              <div 
-                class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg"
-                :class="message.sender_id === currentUser?.id 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-100 text-gray-900'"
-              >
-                <div class="flex items-start space-x-2">
-                  <img 
-                    v-if="message.sender_id !== currentUser?.id && message.sender?.avatar_url"
-                    :src="message.sender.avatar_url" 
-                    :alt="message.sender.username"
-                    class="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                  />
-                  <div class="flex-1">
-                    <p class="text-sm break-words">{{ message.body }}</p>
-                    <p 
-                      class="text-xs mt-1"
-                      :class="message.sender_id === currentUser?.id ? 'text-blue-100' : 'text-gray-500'"
-                    >
-                      {{ formatTime(message.created_at) }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              :message="message"
+              :current-user-id="currentUser?.id"
+            />
           </div>
         </div>
 
         <!-- Message Input -->
-        <div class="border-t p-4">
+        <div class="border-t border-emerald-200 dark:border-gray-700 p-4">
           <form @submit.prevent="sendMessage" class="flex space-x-3">
             <div class="flex-1">
               <input
                 v-model="messageText"
                 type="text"
                 placeholder="Escribe un mensaje..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-emerald-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-neutral-900 text-emerald-800 dark:text-white placeholder-gray-400"
                 :disabled="sending || !targetUser"
                 @keydown.enter.prevent="sendMessage"
               />
@@ -119,7 +95,7 @@
             <button
               type="submit"
               :disabled="!messageText.trim() || sending || !targetUser"
-              class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
             >
               <div v-if="sending" class="flex items-center space-x-2">
                 <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -142,9 +118,13 @@ import { getUserById } from '../services/users';
 import { 
   fetchLastPrivateChatMessages, 
   sendPrivateChatMessage, 
-  subscribeToPrivateChatNewMessages 
+  subscribeToPrivateChatNewMessages,
+  markChatAsRead,
+  fetchPrivateChat
 } from '../services/private-chats';
 import { useScrollToBottom } from '../composables/useScrollToBottom';
+import Avatar from '../components/Avatar.vue';
+import PrivateMessageItem from '../components/PrivateMessageItem.vue';
 
 // Props y composables
 const route = useRoute();
@@ -203,10 +183,25 @@ const loadMessages = async () => {
       targetUserId.value
     );
     messages.value = fetchedMessages;
+    
+    // Marcar mensajes como leídos
+    await markMessagesAsRead();
   } catch (error) {
     console.error('Error al cargar mensajes:', error);
   } finally {
     loading.value = false;
+  }
+};
+
+const markMessagesAsRead = async () => {
+  try {
+    // Obtener el chat ID para marcar como leído
+    const chat = await fetchPrivateChat(currentUser.value.id, targetUserId.value);
+    if (chat) {
+      await markChatAsRead(chat.id, currentUser.value.id);
+    }
+  } catch (error) {
+    console.error('Error al marcar mensajes como leídos:', error);
   }
 };
 
@@ -264,6 +259,9 @@ const setupRealtimeSubscription = () => {
             }
           });
           
+          // Marcar el mensaje como leído inmediatamente
+          await markMessagesAsRead();
+          
           // Scroll automático si está cerca del final
           await autoScrollIfNearBottom();
         } catch (error) {
@@ -272,26 +270,6 @@ const setupRealtimeSubscription = () => {
       }
     }
   );
-};
-
-const formatTime = (timestamp) => {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffInHours = (now - date) / (1000 * 60 * 60);
-
-  if (diffInHours < 24) {
-    return date.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  } else {
-    return date.toLocaleDateString('es-ES', { 
-      day: '2-digit', 
-      month: '2-digit',
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  }
 };
 
 // Lifecycle

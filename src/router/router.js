@@ -10,6 +10,7 @@ const routes = [
     { path: '/perfil',      component: () => import('../pages/Profile.vue'), meta: { requiresAuth: true }},
     { path: '/perfil/:id',  component: () => import('../pages/ProfileFeed.vue'), meta: { requiresAuth: true } },
     { path: '/chat-privado/:userId', component: () => import('../pages/PrivateChat.vue'), meta: { requiresAuth: true } },
+    { path: '/mensajes',    component: () => import('../pages/Messages.vue'), meta: { requiresAuth: true } },
     { path: '/terminos',    component: () => import('../pages/Terms.vue'), meta: { requiresAuth: false } },
     { path: '/privacidad',  component: () => import('../pages/Privacy.vue'), meta: { requiresAuth: false } },
 ];
