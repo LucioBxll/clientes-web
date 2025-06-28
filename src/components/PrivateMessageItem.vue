@@ -14,8 +14,8 @@
           v-if="!isOwnMessage && message.sender?.avatar_url"
           :src="message.sender.avatar_url" 
           :alt="message.sender.username"
-          :fallback-initial="message.sender.username?.charAt(0)?.toUpperCase() || '?'"
-          img-class="w-8 h-8 rounded-full object-cover flex-shrink-0 border-2 border-emerald-400"
+          :inicial-fallback="message.sender.username?.charAt(0)?.toUpperCase() || '?'"
+          clase-imagen="w-8 h-8 rounded-full object-cover flex-shrink-0 border-2 border-emerald-400"
         />
         <div class="flex-1 min-w-0">
           <!-- Nombre del remitente (solo para mensajes ajenos) -->

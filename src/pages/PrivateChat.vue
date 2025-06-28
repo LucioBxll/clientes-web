@@ -17,8 +17,8 @@
               <Avatar 
                 :src="targetUser.avatar_url" 
                 :alt="targetUser.username"
-                :fallback-initial="targetUser.username?.charAt(0)?.toUpperCase() || '?'"
-                img-class="w-10 h-10 rounded-full object-cover border-2 border-emerald-400"
+                :inicial-fallback="targetUser.username?.charAt(0)?.toUpperCase() || '?'"
+                clase-imagen="w-10 h-10 rounded-full object-cover border-2 border-emerald-400"
               />
               <div>
                 <h1 class="text-lg font-semibold text-emerald-800 dark:text-white">{{ targetUser.username }}</h1>
@@ -119,6 +119,7 @@ import {
   fetchLastPrivateChatMessages, 
   sendPrivateChatMessage, 
   subscribeToPrivateChatNewMessages,
+  unsubscribeFromPrivateChatMessages,
   markChatAsRead,
   fetchPrivateChat
 } from '../services/private-chats';
@@ -286,6 +287,16 @@ onMounted(async () => {
 onUnmounted(() => {
   if (subscription.value) {
     subscription.value.unsubscribe();
+  }
+  // También desuscribirse usando el nuevo sistema
+  if (currentUser.value && targetUserId.value) {
+    fetchPrivateChat(currentUser.value.id, targetUserId.value).then(chat => {
+      if (chat) {
+        unsubscribeFromPrivateChatMessages(chat.id);
+      }
+    }).catch(error => {
+      console.error('Error al desuscribirse:', error);
+    });
   }
 });
 

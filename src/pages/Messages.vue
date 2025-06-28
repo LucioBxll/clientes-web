@@ -66,8 +66,9 @@
           <div class="relative flex-shrink-0">
             <Avatar 
               :src="chat.otherUser?.avatar_url" 
-              :username="chat.otherUser?.username"
-              class="w-12 h-12"
+              :alt="chat.otherUser?.username"
+              :inicial-fallback="chat.otherUser?.username?.charAt(0)?.toUpperCase() || '?'"
+              clase-imagen="w-12 h-12 rounded-full object-cover border-2 border-emerald-400"
             />
             
             <!-- Online Status -->

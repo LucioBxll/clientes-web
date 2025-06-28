@@ -1,4 +1,5 @@
 import supabase from './supabase';
+import { subscribeToChat, unsubscribeFromChat } from './realtime';
 
 // Cache para IDs de chat en localStorage
 const CHAT_CACHE_KEY = 'private_chat_cache';
@@ -223,26 +224,22 @@ export function subscribeToPrivateChatNewMessages(sender_id, receiver_id, callba
             return null;
         }
 
-        const subscription = supabase
-            .channel(`private_chat_${chatId}`)
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'private_messages',
-                    filter: `chat_id=eq.${chatId}`
-                },
-                (payload) => {
-                    callback(payload.new);
-                }
-            )
-            .subscribe();
-
-        return subscription;
+        // Usar el nuevo servicio de Realtime
+        return subscribeToChat(chatId, callback);
     } catch (error) {
         console.error('Error al suscribirse a mensajes privados:', error);
         return null;
+    }
+}
+
+/**
+ * Desuscribe de mensajes en tiempo real
+ */
+export function unsubscribeFromPrivateChatMessages(chatId) {
+    try {
+        unsubscribeFromChat(chatId);
+    } catch (error) {
+        console.error('Error al desuscribirse de mensajes privados:', error);
     }
 }
 
