@@ -38,13 +38,13 @@
     </div>
 
     <!-- Chat Container -->
-    <div class="max-w-4xl mx-auto px-4 py-6">
-      <div class="bg-white dark:bg-neutral-950 rounded-lg shadow-sm border border-emerald-200 dark:border-gray-700 h-[600px] flex flex-col">
+    <div class="max-w-4xl min-h-screen  mx-auto px-4 py-6">
+      <div class="bg-white dark:bg-neutral-950 rounded-lg shadow-sm border border-emerald-200 dark:border-gray-700 h-[80vh] flex flex-col">
         
         <!-- Messages Area -->
         <div 
           ref="containerRef"
-          class="flex-1 overflow-y-auto p-4 space-y-4"
+          class="flex-1 min-h-[70vh] overflow-y-auto p-4 space-y-4"
           :class="{ 'opacity-50': loading }"
         >
           <!-- Loading State -->
@@ -307,5 +307,47 @@ watch(messages, async () => {
 </script>
 
 <style scoped>
-/* Estilos adicionales si son necesarios */
+/* Estilos para la barra de scroll personalizada */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f0fdf4; /* emerald-50 */
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #10b981; /* emerald-500 */
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #059669; /* emerald-600 */
+}
+
+/* Estilos para modo oscuro */
+.dark .overflow-y-auto::-webkit-scrollbar-track {
+  background: #064e3b; /* emerald-950 */
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #34d399; /* emerald-400 */
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #10b981; /* emerald-500 */
+}
+
+/* Estilos para Firefox */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #10b981 #f0fdf4; /* thumb track */
+}
+
+.dark .overflow-y-auto {
+  scrollbar-color: #34d399 #064e3b; /* thumb track */
+}
 </style> 

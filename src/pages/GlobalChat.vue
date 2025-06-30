@@ -15,12 +15,12 @@ import Footer from '../components/Footer.vue';
 import { uploadPublicationImage } from '../services/storage';
 import PublicationPreview from '../components/PublicationPreview.vue';
 // Heroicons
-import { HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon } from '@heroicons/vue/24/outline';
+import { HomeIcon, MagnifyingGlassIcon, EnvelopeIcon, UserCircleIcon } from '@heroicons/vue/24/outline';
 
 export default {
   name: 'ChatGlobal',
   components: { MainH1, Avatar, MessageItem, BaseAlert, BaseLoader, BaseModal, Footer, PublicationPreview,
-    HomeIcon, MagnifyingGlassIcon, BellIcon, EnvelopeIcon, UserCircleIcon },
+    HomeIcon, MagnifyingGlassIcon, EnvelopeIcon, UserCircleIcon },
   
   data() {
     return {
@@ -202,12 +202,6 @@ export default {
         <router-link to="/explorar" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">
           <MagnifyingGlassIcon class="w-7 h-7" />
           Explorar
-          <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
-        </router-link>
-        <router-link v-if="!cargando && usuarioActual && usuarioActual.id" to="/notificaciones" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition relative select-none group">
-          <BellIcon class="w-7 h-7" />
-          Notificaciones
-          <span class="absolute left-8 top-1 bg-emerald-600 text-white text-xs rounded-full px-1.5">5</span>
           <span class="absolute left-0 right-0 -bottom-1 h-0.5 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
         </router-link>
         <router-link v-if="!cargando && usuarioActual && usuarioActual.id" to="/mensajes" class="flex items-center gap-4 px-4 py-2 rounded-full text-lg font-medium text-emerald-700 dark:text-white transition select-none relative group">

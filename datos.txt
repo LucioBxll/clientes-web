@@ -1,20 +1,20 @@
 Carrera: Diseño Web
 Materia: Clientes Web Mobile
 Cuatrimestre: 4to Cuatrimestre
-Año: 2024
+Año: 2025
 Turno: Noche
 Comisión: DWN4AV
 Apellido y Nombre: Lucio Boxall
 Docente: Gallino Santiago
-Carácter de entrega: 1er Parcial
+Carácter de entrega: 2do Parcial
 
 Carrera: Diseño Web
 Materia: Clientes Web Mobile
 Cuatrimestre: 4to Cuatrimestre
-Año: 2024
+Año: 2025
 Turno: Noche
 Comisión: DWN4AV
 Apellido y Nombre: German Martini
 Docente: Gallino Santiago
-Carácter de entrega: 1er Parcial
+Carácter de entrega: 2do Parcial
 
